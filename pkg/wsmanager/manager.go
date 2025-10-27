@@ -7,14 +7,13 @@ import (
 )
 
 type Manager struct {
-	clients     map[string]*Client  // clientID -> Client
-	userClients map[string][]string // userID -> []clientID
+	clients     map[string]*Client
+	userClients map[string][]string
 	broadcast   chan []byte
 	register    chan *Client
 	unregister  chan *Client
 	mu          sync.RWMutex
 
-	// 统计信息
 	stats struct {
 		totalConnections   int64
 		currentConnections int64
@@ -42,10 +41,8 @@ func (m *Manager) run() {
 		select {
 		case client := <-m.register:
 			m.handleRegister(client)
-
 		case client := <-m.unregister:
 			m.handleUnregister(client)
-
 		case message := <-m.broadcast:
 			m.handleBroadcast(message)
 		}
@@ -58,12 +55,10 @@ func (m *Manager) handleRegister(client *Client) {
 
 	m.clients[client.ID] = client
 
-	// 维护用户到客户端的映射
 	if client.UserID != "" {
 		m.userClients[client.UserID] = append(m.userClients[client.UserID], client.ID)
 	}
 
-	// 更新统计
 	m.stats.totalConnections++
 	m.stats.currentConnections++
 	if m.stats.currentConnections > m.stats.maxConnections {
@@ -83,7 +78,6 @@ func (m *Manager) handleUnregister(client *Client) {
 		delete(m.clients, client.ID)
 		m.stats.currentConnections--
 
-		// 清理用户映射
 		if client.UserID != "" {
 			if clients, ok := m.userClients[client.UserID]; ok {
 				for i, id := range clients {
@@ -109,9 +103,7 @@ func (m *Manager) handleBroadcast(message []byte) {
 	for _, client := range m.clients {
 		select {
 		case client.Send <- message:
-			// 消息成功发送到通道
 		default:
-			// 通道已满，关闭连接
 			go m.Unregister(client)
 		}
 	}
@@ -172,6 +164,52 @@ func (m *Manager) GetStats() map[string]interface{} {
 		"max_connections":     m.stats.maxConnections,
 		"unique_users":        len(m.userClients),
 	}
+}
+
+func (m *Manager) GetClientByUserID(userID string) []*Client {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var clients []*Client
+	for _, client := range m.clients {
+		if client.UserID == userID {
+			clients = append(clients, client)
+		}
+	}
+	return clients
+}
+
+func (m *Manager) GetUserInfo(userID string) (*UserInfo, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	for _, client := range m.clients {
+		if client.UserID == userID {
+			if userInfo, exists := client.GetUserInfo(); exists {
+				return userInfo, true
+			}
+		}
+	}
+	return nil, false
+}
+
+func (m *Manager) GetOnlineUsers() []*UserInfo {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var users []*UserInfo
+	seen := make(map[string]bool)
+
+	for _, client := range m.clients {
+		if client.UserID != "" && !seen[client.UserID] {
+			if userInfo, exists := client.GetUserInfo(); exists {
+				users = append(users, userInfo)
+				seen[client.UserID] = true
+			}
+		}
+	}
+
+	return users
 }
 
 func (m *Manager) monitorStats() {

@@ -13,6 +13,3 @@ type RealWebSocketConn struct {
 func NewRealWebSocketConn(conn *websocket.Conn) WebSocketConn {
 	return &RealWebSocketConn{Conn: conn}
 }
-
-// 注意：由于嵌入了 *websocket.Conn，所有 WebSocketConn 接口的方法都会自动实现
-// 不需要额外编写任何代码！
