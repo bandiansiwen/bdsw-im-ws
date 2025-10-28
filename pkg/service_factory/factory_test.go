@@ -84,10 +84,10 @@ func TestServiceFactory_WithMock(t *testing.T) {
 			Namespace:  "test",
 		},
 		ServiceNames: struct {
-			UserService     string `mapstructure:"USER_SERVICE_NAME"`
+			MucService      string `mapstructure:"MUC_SERVICE_NAME"`
 			BusinessService string `mapstructure:"BUSINESS_SERVICE_NAME"`
 		}{
-			UserService:     "user-service-test",
+			MucService:      "muc-service-test",
 			BusinessService: "business-service-test",
 		},
 	}
@@ -120,10 +120,10 @@ func TestServiceFactory_NoServices(t *testing.T) {
 	cfg := &config.Config{
 		Env: "test",
 		ServiceNames: struct {
-			UserService     string `mapstructure:"USER_SERVICE_NAME"`
+			MucService      string `mapstructure:"MUC_SERVICE_NAME"`
 			BusinessService string `mapstructure:"BUSINESS_SERVICE_NAME"`
 		}{
-			UserService:     "", // 空的服务名
+			MucService:      "", // 空的服务名
 			BusinessService: "",
 		},
 	}

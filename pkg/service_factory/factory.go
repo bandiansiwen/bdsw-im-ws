@@ -3,6 +3,7 @@ package service_factory
 import (
 	"log"
 	"sync"
+	"time"
 
 	"bdsw-im-ws/internal/config"
 	"bdsw-im-ws/internal/service"
@@ -22,6 +23,12 @@ func NewServiceFactory(cfg *config.Config) (*ServiceFactory, error) {
 	discovery, err := nacos.NewServiceDiscovery(cfg.Nacos.ServerAddr, cfg.Nacos.Namespace)
 	if err != nil {
 		return nil, err
+	}
+	defer discovery.Close()
+
+	// 等待连接就绪（可选，因为SubscribeService内部会等待）
+	if err := discovery.WaitForConnection(30 * time.Second); err != nil {
+		log.Printf("Nacos connection warning: %v", err)
 	}
 
 	factory := &ServiceFactory{
@@ -43,12 +50,12 @@ func (f *ServiceFactory) Init() error {
 	}
 
 	// 订阅用户服务
-	if f.cfg.ServiceNames.UserService != "" {
-		if err := f.discovery.SubscribeService(f.cfg.ServiceNames.UserService); err != nil {
+	if f.cfg.ServiceNames.MucService != "" {
+		if err := f.discovery.SubscribeService(f.cfg.ServiceNames.MucService); err != nil {
 			log.Printf("Failed to subscribe user service: %v", err)
 		} else {
-			f.authClient = service.NewAuthClient(f.discovery, f.cfg.ServiceNames.UserService)
-			log.Printf("Auth client initialized for service: %s", f.cfg.ServiceNames.UserService)
+			f.authClient = service.NewAuthClient(f.discovery, f.cfg.ServiceNames.MucService)
+			log.Printf("Auth client initialized for service: %s", f.cfg.ServiceNames.MucService)
 		}
 	}
 

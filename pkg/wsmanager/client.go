@@ -1,6 +1,7 @@
 package wsmanager
 
 import (
+	"bdsw-im-ws/internal/model"
 	"time"
 )
 
@@ -39,9 +40,9 @@ func (c *Client) GetMetadata(key string) (interface{}, bool) {
 }
 
 // GetUserInfo 获取用户信息
-func (c *Client) GetUserInfo() (*UserInfo, bool) {
+func (c *Client) GetUserInfo() (*model.UserInfo, bool) {
 	if userInfo, exists := c.Metadata["user_info"]; exists {
-		if info, ok := userInfo.(*UserInfo); ok {
+		if info, ok := userInfo.(*model.UserInfo); ok {
 			return info, true
 		}
 	}

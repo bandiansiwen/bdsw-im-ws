@@ -42,7 +42,7 @@ Thumbs.db
 
 # 环境变量文件
 .env
-.env.local
+.env.development
 .env.production
 
 # 依赖目录

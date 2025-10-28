@@ -1,6 +1,7 @@
 package wsmanager
 
 import (
+	"bdsw-im-ws/internal/model"
 	"sync"
 	"testing"
 	"time"
@@ -176,11 +177,9 @@ func TestManager_ConcurrentOperations(t *testing.T) {
 func TestManager_ClientMetadata(t *testing.T) {
 	manager := NewManager()
 
-	userInfo := &UserInfo{
+	userInfo := &model.UserInfo{
 		UserID:   "user-123",
 		Username: "testuser",
-		Email:    "test@example.com",
-		Roles:    []string{"user"},
 	}
 
 	client := &Client{

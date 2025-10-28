@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bdsw-im-ws/internal/model"
 	"bytes"
 	"encoding/json"
 	"net/http"
@@ -52,10 +53,10 @@ func (m *MockServiceFactory) Close() {}
 // MockAuthClient 模拟认证客户端
 type MockAuthClient struct {
 	shouldFail bool
-	userInfo   *wsmanager.UserInfo
+	userInfo   *model.UserInfo
 }
 
-func (m *MockAuthClient) VerifyToken(token string) (*wsmanager.UserInfo, error) {
+func (m *MockAuthClient) VerifyToken(token string) (*model.UserInfo, error) {
 	if m.shouldFail {
 		return nil, assert.AnError
 	}
@@ -70,7 +71,7 @@ func TestWebSocketHandler_HandleConnection(t *testing.T) {
 
 	// 创建模拟服务工厂
 	mockAuthClient := &MockAuthClient{
-		userInfo: &wsmanager.UserInfo{
+		userInfo: &model.UserInfo{
 			UserID:   "test-user-123",
 			Username: "testuser",
 		},
@@ -163,7 +164,7 @@ func TestWebSocketHandler_APIs(t *testing.T) {
 		Send:   make(chan []byte, 256),
 		UserID: "user-1",
 	}
-	client1.SetMetadata("user_info", &wsmanager.UserInfo{
+	client1.SetMetadata("user_info", &model.UserInfo{
 		UserID:   "user-1",
 		Username: "user1",
 	})
@@ -173,7 +174,7 @@ func TestWebSocketHandler_APIs(t *testing.T) {
 		Send:   make(chan []byte, 256),
 		UserID: "user-2",
 	}
-	client2.SetMetadata("user_info", &wsmanager.UserInfo{
+	client2.SetMetadata("user_info", &model.UserInfo{
 		UserID:   "user-2",
 		Username: "user2",
 	})

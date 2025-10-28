@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bdsw-im-ws/internal/model"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,7 +9,6 @@ import (
 	"time"
 
 	"bdsw-im-ws/pkg/nacos"
-	"bdsw-im-ws/pkg/wsmanager"
 )
 
 type AuthClient struct {
@@ -27,21 +27,7 @@ func NewAuthClient(discovery *nacos.ServiceDiscovery, serviceName string) *AuthC
 	}
 }
 
-type UserInfo struct {
-	UserID   string   `json:"user_id"`
-	Username string   `json:"username"`
-	Email    string   `json:"email,omitempty"`
-	Avatar   string   `json:"avatar,omitempty"`
-	Roles    []string `json:"roles,omitempty"`
-}
-
-type VerifyTokenResponse struct {
-	Valid   bool     `json:"valid"`
-	User    UserInfo `json:"user,omitempty"`
-	Message string   `json:"message,omitempty"`
-}
-
-func (a *AuthClient) VerifyToken(token string) (*wsmanager.UserInfo, error) {
+func (a *AuthClient) VerifyToken(token string) (*model.UserInfo, error) {
 	if token == "" {
 		return nil, fmt.Errorf("token is empty")
 	}
@@ -53,7 +39,7 @@ func (a *AuthClient) VerifyToken(token string) (*wsmanager.UserInfo, error) {
 	}
 
 	// 调用用户服务的token验证接口
-	req, err := http.NewRequest("GET", serviceURL+"/api/auth/verify", nil)
+	req, err := http.NewRequest("GET", serviceURL+"/VerifyToken", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
@@ -70,23 +56,17 @@ func (a *AuthClient) VerifyToken(token string) (*wsmanager.UserInfo, error) {
 		return nil, fmt.Errorf("token verification failed with status: %d", resp.StatusCode)
 	}
 
-	var result VerifyTokenResponse
+	var result model.VerifyTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
 
-	if !result.Valid {
+	if result.Code > 0 {
 		return nil, fmt.Errorf("invalid token: %s", result.Message)
 	}
 
 	log.Printf("Token verified successfully for user: %s", result.User.Username)
 
 	// 转换为wsmanager.UserInfo
-	return &wsmanager.UserInfo{
-		UserID:   result.User.UserID,
-		Username: result.User.Username,
-		Email:    result.User.Email,
-		Avatar:   result.User.Avatar,
-		Roles:    result.User.Roles,
-	}, nil
+	return &result.User, nil
 }

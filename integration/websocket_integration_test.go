@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"bdsw-im-ws/internal/model"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -45,8 +46,8 @@ func (m *MockServiceFactory) Close() {}
 // MockAuthClient 模拟认证客户端
 type MockAuthClient struct{}
 
-func (m *MockAuthClient) VerifyToken(token string) (*wsmanager.UserInfo, error) {
-	return &wsmanager.UserInfo{
+func (m *MockAuthClient) VerifyToken(token string) (*model.UserInfo, error) {
+	return &model.UserInfo{
 		UserID:   "test-user-123",
 		Username: "testuser",
 	}, nil

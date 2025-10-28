@@ -1,6 +1,7 @@
 package wsmanager
 
 import (
+	"bdsw-im-ws/internal/model"
 	"log"
 	"sync"
 	"time"
@@ -179,7 +180,7 @@ func (m *Manager) GetClientByUserID(userID string) []*Client {
 	return clients
 }
 
-func (m *Manager) GetUserInfo(userID string) (*UserInfo, bool) {
+func (m *Manager) GetUserInfo(userID string) (*model.UserInfo, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -193,11 +194,11 @@ func (m *Manager) GetUserInfo(userID string) (*UserInfo, bool) {
 	return nil, false
 }
 
-func (m *Manager) GetOnlineUsers() []*UserInfo {
+func (m *Manager) GetOnlineUsers() []*model.UserInfo {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	var users []*UserInfo
+	var users []*model.UserInfo
 	seen := make(map[string]bool)
 
 	for _, client := range m.clients {
