@@ -1,0 +1,83 @@
+app:
+  name: "ima-gateway"
+  version: "1.0.0"
+  environment: "dev"  # dev, test, prod
+
+  # 服务发现
+  discovery:
+    nacos:
+      server_addr: "127.0.0.1:8848"
+      namespace: "public"
+      group: "DEFAULT_GROUP"
+      cluster_name: "DEFAULT"
+
+  # 服务配置
+  service:
+    ima:
+      instance_id: "auto"  # 自动生成实例ID
+      weight: 100
+      healthy: true
+      enabled: true
+
+    # 依赖服务配置
+    dependencies:
+      muc_service:
+        name: "muc-service"
+        version: "1.0.0"
+        group: "dev"
+
+      msg_service:
+        name: "msg-service"
+        version: "1.0.0"
+        group: "dev"
+
+      push_service:
+        name: "push-service"
+        version: "1.0.0"
+        group: "dev"
+
+  # 安全配置
+  security:
+    token_validation:
+      enabled: true
+      cache_enabled: true
+      cache_ttl: "5m"
+      timeout: "3s"
+  
+    # 多端登录策略
+    multi_login:
+      strategy: "kick_other"  # allow_all, kick_other, allow_web_and_mobile
+      max_devices_per_user: 5
+      allowed_device_types:
+        - "web"
+        - "android"
+        - "ios"
+        - "windows"
+        - "mac"
+
+  # 性能配置
+  performance:
+    max_goroutines: 10000
+    connection_pool_size: 1000
+    message_queue_size: 10000
+    batch_process_size: 100
+    batch_process_interval: "100ms"
+
+  # 监控配置
+  monitor:
+    enabled: true
+    prometheus_port: "9090"
+    metrics_path: "/metrics"
+    health_check_path: "/health"
+    stats_interval: "60s"
+
+  # 日志配置
+  log:
+    level: "info"  # debug, info, warn, error
+    format: "console" # json, console
+    output: "both" # stdout, file, both
+    file_path: "./logs/ima-gateway-dev.log"
+    max_size: 100   # MB
+    max_backups: 10
+    max_age: 30     # days
+    compress: true

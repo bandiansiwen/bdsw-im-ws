@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package muc;
+
+option go_package = "bdsw-im-ws/api/muc";
+
+import "api/common/common.proto";
+
+// Token 验证请求
+message TokenValidateRequest {
+  string user_id = 1;
+  string token = 2;
+  string device_id = 3;
+  string client_version = 4;
+  string client_type = 5;
+  common.DeviceInfo device_info = 6;
+}
+
+// Token 验证响应
+message TokenValidateResponse {
+  common.BaseResponse base = 1;
+  bool valid = 2;
+  string user_id = 3;
+  string reason = 4;
+  int64 expire_time = 5;
+  map<string, string> user_info = 6;
+  string session_id = 7;
+  repeated string permissions = 8;
+}
+
+// 刷新 Token 请求
+message RefreshTokenRequest {
+  string user_id = 1;
+  string refresh_token = 2;
+  string device_id = 3;
+}
+
+// 刷新 Token 响应
+message RefreshTokenResponse {
+  common.BaseResponse base = 1;
+  string new_token = 2;
+  string refresh_token = 3;
+  int64 expire_time = 4;
+}
+
+// 获取用户权限请求
+message GetUserPermissionsRequest {
+  string user_id = 1;
+}
+
+// 获取用户权限响应
+message GetUserPermissionsResponse {
+  common.BaseResponse base = 1;
+  repeated string permissions = 2;
+  map<string, bool> feature_flags = 3;
+}
+
+// 用户登出请求
+message LogoutRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string reason = 3;  // user_initiated, token_expired, admin_force
+}
+
+// 用户登录请求
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string device_id = 3;
+  common.DeviceInfo device_info = 4;
+}
+
+// 用户登录响应
+message LoginResponse {
+  common.BaseResponse base = 1;
+  string user_id = 2;
+  string token = 3;
+  string refresh_token = 4;
+  int64 expire_time = 5;
+  common.UserInfo user_info = 6;
+}

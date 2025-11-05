@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package server_push;
+
+option go_package = "bdsw-im-ws/api/server_push";
+
+import "api/common/common.proto";
+import "api/ima_gateway/ima_gateway.proto";
+
+// 心跳
+message Heartbeat {
+  string ima_instance = 1;
+  int64 timestamp = 2;
+  int32 online_count = 3;
+  map<string, string> metadata = 4;
+}
+
+// 广播系统消息请求
+message BroadcastSystemMessageRequest {
+  common.ServerMessage message = 1;
+  repeated string exclude_users = 2;  // 排除的用户列表
+  string broadcast_type = 3;          // all, online, specific
+}
+
+// 群组推送请求
+message GroupPushRequest {
+  string group_id = 1;
+  common.ServerMessage message = 2;
+  repeated string exclude_users = 3;  // 排除的用户列表
+}
+
+// 用户状态变更通知
+message UserStatusChange {
+  string user_id = 1;
+  string device_id = 2;
+  string status = 3;  // online, offline, away, busy
+  int64 timestamp = 4;
+  string ima_instance = 5;
+}
+
+// 强制刷新请求
+message ForceRefreshRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string refresh_type = 3;  // config, session, all
+}

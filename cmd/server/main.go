@@ -1,6 +1,10 @@
 package main
 
 import (
+	"bdsw-im-ws/internal/dubbo/client"
+	"bdsw-im-ws/internal/dubbo/provider"
+	"bdsw-im-ws/internal/redis"
+	"bdsw-im-ws/internal/service"
 	"context"
 	"log"
 	"net/http"
@@ -16,7 +20,6 @@ import (
 	"bdsw-im-ws/internal/middleware"
 	"bdsw-im-ws/pkg/monitor"
 	"bdsw-im-ws/pkg/service_factory"
-	"bdsw-im-ws/pkg/wsmanager"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,6 +50,59 @@ func main() {
 		log.Println("Starting pprof server on :6060")
 		log.Println(http.ListenAndServe(":6060", nil))
 	}()
+
+	// 1. 加载应用配置
+	if err := config.InitConfig(); err != nil {
+		log.Fatalf("Failed to load app config: %v", err)
+	}
+
+	appConfig := config.GetConfig()
+	log.Printf("Starting IMA Gateway in %s environment", appConfig.App.Environment)
+
+	// 2. 加载 Dubbo 配置
+	if err := config.Load(
+		config.WithPath("./config/server.yml"),
+		config.WithPath("./config/client.yml"),
+	); err != nil {
+		log.Fatalf("Failed to load Dubbo config: %v", err)
+	}
+
+	// 3. 初始化 Redis 客户端
+	redisConfig := appConfig.Redis.Standalone
+	redisClient := redis.NewClient(&redis.Config{
+		Addr:     redisConfig.Addr,
+		Password: redisConfig.Password,
+		DB:       redisConfig.DB,
+	})
+
+	if err := redisClient.Ping(context.Background()); err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	log.Println("Redis connected successfully")
+
+	// 4. 初始化网关服务
+	gatewayService := service.NewGatewayService(redisClient)
+
+	// 5. 初始化 Dubbo 客户端
+	dubboClient, err := client.NewClient()
+	if err != nil {
+		log.Fatalf("Failed to create Dubbo client: %v", err)
+	}
+	gatewayService.SetDubboClient(dubboClient)
+
+	// 6. 注册 Dubbo 服务提供者
+	gatewayProvider := provider.NewIMAGatewayServiceProvider(gatewayService)
+	config.SetProviderService(gatewayProvider)
+
+	// 7. 启动网关服务
+	if err := gatewayService.Start(); err != nil {
+		log.Fatalf("Failed to start IMA Gateway: %v", err)
+	}
+
+	log.Println("IMA Gateway started successfully")
+
+	// 8. 等待中断信号
+	waitForShutdown(gatewayService)
 
 	// 加载配置
 	cfg := config.Load()
@@ -150,4 +206,22 @@ func main() {
 	}
 
 	log.Println("Server exited")
+}
+
+func waitForShutdown(gatewayService *service.GatewayService) {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+
+	<-signals
+	log.Println("Received shutdown signal, gracefully shutting down...")
+
+	// 优雅关闭
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := gatewayService.Shutdown(ctx); err != nil {
+		log.Printf("Error during shutdown: %v", err)
+	}
+
+	log.Println("IMA Gateway shutdown completed")
 }

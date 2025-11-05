@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package business_message;
+
+option go_package = "bdsw-im-ws/api/business_message";
+
+import "api/common/common.proto";
+
+// 处理批量消息请求
+message HandleBatchMessagesRequest {
+  repeated common.ClientMessage messages = 1;
+}
+
+// 处理批量消息响应
+message HandleBatchMessagesResponse {
+  common.BaseResponse base = 1;
+  repeated common.ServerMessage responses = 2;
+  int32 success_count = 3;
+  int32 fail_count = 4;
+}
+
+// 会话信息
+message SessionInfo {
+  string session_id = 1;
+  string session_type = 2;  // single, group, system
+  string target_id = 3;
+  string last_message = 4;
+  int64 last_message_time = 5;
+  int32 unread_count = 6;
+  bool is_top = 7;
+  bool mute = 8;
+}
+
+// 获取用户会话列表请求
+message GetUserSessionsRequest {
+  string user_id = 1;
+  common.PageRequest page = 2;
+}
+
+// 获取用户会话列表响应
+message GetUserSessionsResponse {
+  common.BaseResponse base = 1;
+  repeated SessionInfo sessions = 2;
+  common.PageResponse page = 3;
+}
+
+// 获取聊天历史请求
+message GetChatHistoryRequest {
+  string session_id = 1;
+  string user_id = 2;
+  int64 start_time = 3;
+  int64 end_time = 4;
+  common.PageRequest page = 5;
+}
+
+// 获取聊天历史响应
+message GetChatHistoryResponse {
+  common.BaseResponse base = 1;
+  repeated common.ServerMessage messages = 2;
+  common.PageResponse page = 3;
+}
+
+// 消息已读确认请求
+message MessageReadRequest {
+  string user_id = 1;
+  string session_id = 2;
+  string message_id = 3;  // 为空表示已读该会话所有消息
+  int64 read_time = 4;
+}
+
+// 撤回消息请求
+message RecallMessageRequest {
+  string user_id = 1;
+  string message_id = 2;
+  string reason = 3;
+}

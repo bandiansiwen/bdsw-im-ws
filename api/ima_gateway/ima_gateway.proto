@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package ima_gateway;
+
+option go_package = "bdsw-im-ws/api/ima_gateway";
+
+import "api/common/common.proto";
+
+// 推送请求
+message PushRequest {
+  string user_id = 1;
+  string device_id = 2;
+  common.ServerMessage message = 3;
+}
+
+// 批量推送
+message BatchPushRequest {
+  repeated PushRequest pushes = 1;
+}
+
+// 广播消息
+message BroadcastMessage {
+  common.ServerMessage message = 1;
+  repeated string target_users = 2;  // 空表示广播给所有人
+}
+
+// 连接状态
+message ConnectionStatus {
+  string user_id = 1;
+  string device_id = 2;
+  string ima_instance = 3;
+  string status = 4;  // online, offline, away, busy
+  int64 timestamp = 5;
+  common.DeviceInfo device_info = 6;
+}
+
+// 踢用户下线请求
+message KickUserRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string reason = 3;  // multi_login, admin_kick, system_maintenance
+  string operator = 4;
+}
+
+// 获取在线用户请求
+message GetOnlineUsersRequest {
+  repeated string user_ids = 1;
+  string ima_instance = 2;  // 为空表示所有实例
+}
+
+// 获取在线用户响应
+message GetOnlineUsersResponse {
+  common.BaseResponse base = 1;
+  repeated ConnectionStatus online_users = 2;
+  int32 total_count = 3;
+}
+
+// 检查用户在线状态请求
+message CheckUserOnlineRequest {
+  string user_id = 1;
+  string device_id = 2;  // 为空表示任意设备
+}
+
+// 检查用户在线状态响应
+message CheckUserOnlineResponse {
+  common.BaseResponse base = 1;
+  bool online = 2;
+  repeated string online_devices = 3;
+  string ima_instance = 4;
+  int64 last_active_time = 5;
+}

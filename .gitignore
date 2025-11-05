@@ -40,11 +40,6 @@ temp/
 .DS_Store
 Thumbs.db
 
-# 环境变量文件
-.env
-.env.development
-.env.production
-
 # 依赖目录
 vendor/
 

@@ -3,110 +3,328 @@ package config
 import (
 	"log"
 	"os"
-	"strings"
+	"path/filepath"
+	"sync"
 
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
+// Config 全局配置
 type Config struct {
-	Port string `mapstructure:"PORT"`
-	Env  string `mapstructure:"ENV"`
-
-	// Nacos配置
-	Nacos struct {
-		ServerAddr string `mapstructure:"NACOS_SERVER_ADDR"`
-		Namespace  string `mapstructure:"NACOS_NAMESPACE"`
-		Group      string `mapstructure:"NACOS_GROUP"`
-		DataID     string `mapstructure:"NACOS_DATA_ID"`
-	} `mapstructure:"NACOS"`
-
-	// 服务名称（从Nacos发现）
-	ServiceNames struct {
-		MucService      string `mapstructure:"MUC_SERVICE_NAME"`
-		BusinessService string `mapstructure:"BUSINESS_SERVICE_NAME"`
-	} `mapstructure:"SERVICE_NAMES"`
-
-	WebSocket struct {
-		ReadBufferSize    int   `mapstructure:"WS_READ_BUFFER_SIZE"`
-		WriteBufferSize   int   `mapstructure:"WS_WRITE_BUFFER_SIZE"`
-		EnableCompression bool  `mapstructure:"WS_ENABLE_COMPRESSION"`
-		HandshakeTimeout  int   `mapstructure:"WS_HANDSHAKE_TIMEOUT"`
-		MaxMessageSize    int64 `mapstructure:"WS_MAX_MESSAGE_SIZE"`
-		PingInterval      int   `mapstructure:"WS_PING_INTERVAL"`
-		PongWait          int   `mapstructure:"WS_PONG_WAIT"`
-		WriteWait         int   `mapstructure:"WS_WRITE_WAIT"`
-	} `mapstructure:"WEBSOCKET"`
+	App       AppConfig       `yaml:"app"`
+	Redis     RedisConfig     `yaml:"redis"`
+	WebSocket WebSocketConfig `yaml:"websocket"`
+	Dubbo     DubboConfig     `yaml:"dubbo"`
 }
 
-func Load() *Config {
-	// 设置默认值
-	setDefaults()
-
-	// 根据环境加载对应的.env文件
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
-
-	// 加载.env文件
-	viper.SetConfigName(".env." + env)
-	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("/etc/websocket-service/")
-
-	if err := viper.MergeInConfig(); err == nil {
-		log.Printf("Warning: No config file found, using environment variables and defaults: %v", err)
-	}
-
-	// 自动读取环境变量（优先级最高）
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("WS")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatalf("Unable to decode config into struct: %v", err)
-	}
-
-	logConfig(&config)
-	return &config
+// AppConfig 应用配置
+type AppConfig struct {
+	Name        string            `yaml:"name"`
+	Version     string            `yaml:"version"`
+	Environment string            `yaml:"environment"`
+	Discovery   DiscoveryConfig   `yaml:"discovery"`
+	Service     ServiceConfig     `yaml:"service"`
+	Security    SecurityConfig    `yaml:"security"`
+	Performance PerformanceConfig `yaml:"performance"`
+	Monitor     MonitorConfig     `yaml:"monitor"`
+	Log         LogConfig         `yaml:"log"`
 }
 
-func setDefaults() {
-	viper.SetDefault("PORT", "8080")
-	viper.SetDefault("ENV", "development")
-
-	// Nacos默认配置
-	viper.SetDefault("Nacos.NACOS_SERVER_ADDR", "localhost:8848")
-	viper.SetDefault("Nacos.NACOS_NAMESPACE", "public")
-	viper.SetDefault("Nacos.NACOS_GROUP", "DEFAULT_GROUP")
-	viper.SetDefault("Nacos.NACOS_DATA_ID", "websocket-service")
-
-	// 服务名称默认值
-	viper.SetDefault("ServiceNames.MUC_SERVICE_NAME", "muc-service")
-	viper.SetDefault("ServiceNames.BUSINESS_SERVICE_NAME", "im-business-service")
-
-	// WebSocket默认配置
-	viper.SetDefault("WebSocket.WS_READ_BUFFER_SIZE", 1024)
-	viper.SetDefault("WebSocket.WS_WRITE_BUFFER_SIZE", 1024)
-	viper.SetDefault("WebSocket.WS_ENABLE_COMPRESSION", true)
-	viper.SetDefault("WebSocket.WS_HANDSHAKE_TIMEOUT", 10)
-	viper.SetDefault("WebSocket.WS_MAX_MESSAGE_SIZE", 512)
-	viper.SetDefault("WebSocket.WS_PING_INTERVAL", 30)
-	viper.SetDefault("WebSocket.WS_PONG_WAIT", 60)
-	viper.SetDefault("WebSocket.WS_WRITE_WAIT", 10)
+// RedisConfig Redis配置
+type RedisConfig struct {
+	Standalone RedisStandaloneConfig `yaml:"standalone"`
+	KeyPrefix  string                `yaml:"key_prefix"`
+	TTL        RedisTTLConfig        `yaml:"ttl"`
 }
 
-func logConfig(cfg *Config) {
-	log.Printf("=== Configuration ===")
-	log.Printf("Environment: %s", cfg.Env)
-	log.Printf("Port: %s", cfg.Port)
-	log.Printf("Nacos Server: %s", cfg.Nacos.ServerAddr)
-	log.Printf("Nacos Namespace: %s", cfg.Nacos.Namespace)
-	log.Printf("User Service: %s", cfg.ServiceNames.MucService)
-	log.Printf("Business Service: %s", cfg.ServiceNames.BusinessService)
-	log.Printf("WebSocket - ReadBuffer: %d, WriteBuffer: %d",
-		cfg.WebSocket.ReadBufferSize, cfg.WebSocket.WriteBufferSize)
-	log.Printf("=====================")
+type RedisStandaloneConfig struct {
+	Addr               string `yaml:"addr"`
+	Password           string `yaml:"password"`
+	DB                 int    `yaml:"db"`
+	PoolSize           int    `yaml:"pool_size"`
+	MinIdleConns       int    `yaml:"min_idle_conns"`
+	MaxRetries         int    `yaml:"max_retries"`
+	DialTimeout        string `yaml:"dial_timeout"`
+	ReadTimeout        string `yaml:"read_timeout"`
+	WriteTimeout       string `yaml:"write_timeout"`
+	PoolTimeout        string `yaml:"pool_timeout"`
+	IdleTimeout        string `yaml:"idle_timeout"`
+	IdleCheckFrequency string `yaml:"idle_check_frequency"`
+}
+
+type RedisTTLConfig struct {
+	UserConnection int `yaml:"user_connection"`
+	InstanceStatus int `yaml:"instance_status"`
+	TokenCache     int `yaml:"token_cache"`
+	OnlineUsers    int `yaml:"online_users"`
+}
+
+// WebSocketConfig WebSocket配置
+type WebSocketConfig struct {
+	Server    WebSocketServerConfig `yaml:"server"`
+	CORS      CORSConfig            `yaml:"cors"`
+	RateLimit RateLimitConfig       `yaml:"rate_limit"`
+}
+
+type WebSocketServerConfig struct {
+	Port              string `yaml:"port"`
+	ReadBufferSize    int    `yaml:"read_buffer_size"`
+	WriteBufferSize   int    `yaml:"write_buffer_size"`
+	MaxMessageSize    int    `yaml:"max_message_size"`
+	HandshakeTimeout  string `yaml:"handshake_timeout"`
+	WriteTimeout      string `yaml:"write_timeout"`
+	PongWait          string `yaml:"pong_wait"`
+	PingPeriod        string `yaml:"ping_period"`
+	MaxConnections    int    `yaml:"max_connections"`
+	EnableCompression bool   `yaml:"enable_compression"`
+}
+
+type CORSConfig struct {
+	Enabled      bool     `yaml:"enabled"`
+	AllowOrigins []string `yaml:"allow_origins"`
+	AllowMethods []string `yaml:"allow_methods"`
+	AllowHeaders []string `yaml:"allow_headers"`
+}
+
+type RateLimitConfig struct {
+	Enabled           bool `yaml:"enabled"`
+	RequestsPerSecond int  `yaml:"requests_per_second"`
+	Burst             int  `yaml:"burst"`
+}
+
+// DubboConfig Dubbo配置
+type DubboConfig struct {
+	Application DubboApplicationConfig         `yaml:"application"`
+	Registries  map[string]DubboRegistryConfig `yaml:"registries"`
+	Protocols   map[string]DubboProtocolConfig `yaml:"protocols"`
+	Provider    DubboProviderConfig            `yaml:"provider"`
+	Consumer    DubboConsumerConfig            `yaml:"consumer"`
+}
+
+type DubboApplicationConfig struct {
+	Name         string `yaml:"name"`
+	Version      string `yaml:"version"`
+	Organization string `yaml:"organization"`
+	Module       string `yaml:"module"`
+	Environment  string `yaml:"environment"`
+}
+
+type DubboRegistryConfig struct {
+	Protocol  string `yaml:"protocol"`
+	Address   string `yaml:"address"`
+	Namespace string `yaml:"namespace"`
+	Timeout   string `yaml:"timeout"`
+	Username  string `yaml:"username"`
+	Password  string `yaml:"password"`
+}
+
+type DubboProtocolConfig struct {
+	Name          string `yaml:"name"`
+	Port          int    `yaml:"port"`
+	Serialization string `yaml:"serialization"`
+}
+
+type DubboProviderConfig struct {
+	Filter   string                        `yaml:"filter"`
+	Services map[string]DubboServiceConfig `yaml:"services"`
+}
+
+type DubboConsumerConfig struct {
+	Check          bool                            `yaml:"check"`
+	RequestTimeout string                          `yaml:"request_timeout"`
+	ConnectTimeout string                          `yaml:"connect_timeout"`
+	ClientNumber   int                             `yaml:"client_number"`
+	PoolSize       int                             `yaml:"pool_size"`
+	PoolTTL        int                             `yaml:"pool_ttl"`
+	References     map[string]DubboReferenceConfig `yaml:"references"`
+}
+
+type DubboServiceConfig struct {
+	Interface     string              `yaml:"interface"`
+	Version       string              `yaml:"version"`
+	Group         string              `yaml:"group"`
+	Protocol      string              `yaml:"protocol"`
+	Serialization string              `yaml:"serialization"`
+	Cluster       string              `yaml:"cluster"`
+	Loadbalance   string              `yaml:"loadbalance"`
+	Warmup        string              `yaml:"warmup"`
+	Retries       int                 `yaml:"retries"`
+	Methods       []DubboMethodConfig `yaml:"methods"`
+}
+
+type DubboReferenceConfig struct {
+	Protocol      string              `yaml:"protocol"`
+	Interface     string              `yaml:"interface"`
+	Version       string              `yaml:"version"`
+	Group         string              `yaml:"group"`
+	Cluster       string              `yaml:"cluster"`
+	Loadbalance   string              `yaml:"loadbalance"`
+	Serialization string              `yaml:"serialization"`
+	Timeout       string              `yaml:"timeout"`
+	Retries       int                 `yaml:"retries"`
+	Async         bool                `yaml:"async"`
+	Methods       []DubboMethodConfig `yaml:"methods"`
+}
+
+type DubboMethodConfig struct {
+	Name    string `yaml:"name"`
+	Retries int    `yaml:"retries"`
+}
+
+// 其他配置结构...
+type DiscoveryConfig struct {
+	Nacos NacosConfig `yaml:"nacos"`
+}
+
+type NacosConfig struct {
+	ServerAddr  string `yaml:"server_addr"`
+	Namespace   string `yaml:"namespace"`
+	Group       string `yaml:"group"`
+	ClusterName string `yaml:"cluster_name"`
+}
+
+type ServiceConfig struct {
+	IMA          ServiceInstanceConfig `yaml:"ima"`
+	Dependencies DependenciesConfig    `yaml:"dependencies"`
+}
+
+type ServiceInstanceConfig struct {
+	InstanceID string `yaml:"instance_id"`
+	Weight     int    `yaml:"weight"`
+	Healthy    bool   `yaml:"healthy"`
+	Enabled    bool   `yaml:"enabled"`
+}
+
+type DependenciesConfig struct {
+	MUCService  ServiceReferenceConfig `yaml:"muc_service"`
+	MSGService  ServiceReferenceConfig `yaml:"msg_service"`
+	PushService ServiceReferenceConfig `yaml:"push_service"`
+}
+
+type ServiceReferenceConfig struct {
+	Name    string `yaml:"name"`
+	Version string `yaml:"version"`
+	Group   string `yaml:"group"`
+}
+
+type SecurityConfig struct {
+	TokenValidation TokenValidationConfig `yaml:"token_validation"`
+	MultiLogin      MultiLoginConfig      `yaml:"multi_login"`
+}
+
+type TokenValidationConfig struct {
+	Enabled      bool   `yaml:"enabled"`
+	CacheEnabled bool   `yaml:"cache_enabled"`
+	CacheTTL     string `yaml:"cache_ttl"`
+	Timeout      string `yaml:"timeout"`
+}
+
+type MultiLoginConfig struct {
+	Strategy           string   `yaml:"strategy"`
+	MaxDevicesPerUser  int      `yaml:"max_devices_per_user"`
+	AllowedDeviceTypes []string `yaml:"allowed_device_types"`
+}
+
+type PerformanceConfig struct {
+	MaxGoroutines        int    `yaml:"max_goroutines"`
+	ConnectionPoolSize   int    `yaml:"connection_pool_size"`
+	MessageQueueSize     int    `yaml:"message_queue_size"`
+	BatchProcessSize     int    `yaml:"batch_process_size"`
+	BatchProcessInterval string `yaml:"batch_process_interval"`
+}
+
+type MonitorConfig struct {
+	Enabled         bool   `yaml:"enabled"`
+	PrometheusPort  string `yaml:"prometheus_port"`
+	MetricsPath     string `yaml:"metrics_path"`
+	HealthCheckPath string `yaml:"health_check_path"`
+	StatsInterval   string `yaml:"stats_interval"`
+}
+
+type LogConfig struct {
+	Level      string `yaml:"level"`
+	Format     string `yaml:"format"`
+	Output     string `yaml:"output"`
+	FilePath   string `yaml:"file_path"`
+	MaxSize    int    `yaml:"max_size"`
+	MaxBackups int    `yaml:"max_backups"`
+	MaxAge     int    `yaml:"max_age"`
+	Compress   bool   `yaml:"compress"`
+}
+
+var (
+	globalConfig *Config
+	configOnce   sync.Once
+)
+
+// LoadConfig 加载配置
+func LoadConfig(configPaths ...string) (*Config, error) {
+	var err error
+	configOnce.Do(func() {
+		globalConfig, err = loadConfigFiles(configPaths...)
+	})
+	return globalConfig, err
+}
+
+// GetConfig 获取全局配置
+func GetConfig() *Config {
+	return globalConfig
+}
+
+func loadConfigFiles(configPaths ...string) (*Config, error) {
+	config := &Config{}
+
+	// 默认配置文件路径
+	if len(configPaths) == 0 {
+		configPaths = []string{
+			"config/app_dev.yml",
+			"config/redis/redis.yml",
+			"config/websocket/websocket.yml",
+			"config/dubbo/client.yml",
+			"config/dubbo/server.yml",
+		}
+	}
+
+	for _, path := range configPaths {
+		if err := loadYAMLFile(path, config); err != nil {
+			return nil, err
+		}
+	}
+
+	return config, nil
+}
+
+func loadYAMLFile(filePath string, config interface{}) error {
+	// 检查文件是否存在
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("Config file %s does not exist, skipping", filePath)
+		return nil
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	return yaml.Unmarshal(data, config)
+}
+
+// InitConfig 初始化配置
+func InitConfig() error {
+	// 确定配置文件路径
+	configDir := "config"
+	if envConfigDir := os.Getenv("CONFIG_DIR"); envConfigDir != "" {
+		configDir = envConfigDir
+	}
+
+	configPaths := []string{
+		filepath.Join(configDir, "app_dev.yml"),
+		filepath.Join(configDir, "redis/redis.yml"),
+		filepath.Join(configDir, "websocket/websocket.yml"),
+		filepath.Join(configDir, "dubbo/client.yml"),
+		filepath.Join(configDir, "dubbo/server.yml"),
+	}
+
+	_, err := LoadConfig(configPaths...)
+	return err
 }

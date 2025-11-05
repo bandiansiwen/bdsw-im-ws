@@ -1,0 +1,34 @@
+redis:
+  # Redis 单节点配置
+  standalone:
+    addr: "127.0.0.1:6379"
+    password: ""           # 如果有密码
+    db: 0
+    pool_size: 100
+    min_idle_conns: 10
+    max_retries: 3
+    dial_timeout: "5s"
+    read_timeout: "3s"
+    write_timeout: "3s"
+    pool_timeout: "4s"
+    idle_timeout: "5m"
+    idle_check_frequency: "1m"
+
+  # 或者使用集群配置（二选一）
+  # cluster:
+  #   addrs:
+  #     - "127.0.0.1:7001"
+  #     - "127.0.0.1:7002"
+  #     - "127.0.0.1:7003"
+  #   password: ""
+  #   pool_size: 100
+
+  # Key 前缀配置
+  key_prefix: "ima:"
+
+  # TTL 配置（秒）
+  ttl:
+    user_connection: 86400    # 24小时
+    instance_status: 120      # 2分钟
+    token_cache: 300         # 5分钟
+    online_users: 60         # 1分钟

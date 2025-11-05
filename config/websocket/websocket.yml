@@ -1,0 +1,33 @@
+websocket:
+  server:
+    port: "8080"
+    read_buffer_size: 1024
+    write_buffer_size: 1024
+    max_message_size: 65536   # 64KB
+    handshake_timeout: "10s"
+    write_timeout: "10s"
+    pong_wait: "60s"
+    ping_period: "54s"        # 比 pong_wait 稍短
+    max_connections: 10000
+    enable_compression: true
+
+  # 跨域配置
+  cors:
+    enabled: true
+    allow_origins:
+      - "http://localhost:3000"
+      - "http://127.0.0.1:3000"
+      - "https://yourdomain.com"
+    allow_methods:
+      - "GET"
+      - "POST"
+    allow_headers:
+      - "Origin"
+      - "Content-Type"
+      - "Authorization"
+
+  # 连接限制
+  rate_limit:
+    enabled: true
+    requests_per_second: 10
+    burst: 30
