@@ -51,7 +51,7 @@ func NewGatewayService(redisClient *redis.Client) *GatewayService {
 		redisClient:     redisClient,
 		userConnections: NewUserConnectionManager(),
 		websocketServer: NewWebSocketServer(&WebSocketConfig{
-			Port:            "8080",
+			Port:            "8888",
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		}),
@@ -76,7 +76,7 @@ func (s *GatewayService) Start() error {
 	go s.websocketServer.Start(s.handleWebSocketConnection)
 
 	// 2. 连接到业务服务的推送流
-	go s.connectToServerPushStream()
+	//go s.connectToServerPushStream()
 
 	// 3. 启动健康检查
 	go s.startHealthCheck()
