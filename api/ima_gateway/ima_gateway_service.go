@@ -18,8 +18,4 @@ type IMAGatewayService interface {
 	Broadcast(ctx context.Context, req *BroadcastMessage) (*common.BaseResponse, error)
 	// 踢用户下线
 	KickUser(ctx context.Context, req *KickUserRequest) (*common.BaseResponse, error)
-	// 获取在线用户列表
-	GetOnlineUsers(ctx context.Context, req *GetOnlineUsersRequest) (*GetOnlineUsersResponse, error)
-	// 检查用户是否在线
-	CheckUserOnline(ctx context.Context, req *CheckUserOnlineRequest) (*CheckUserOnlineResponse, error)
 }

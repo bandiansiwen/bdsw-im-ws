@@ -3,39 +3,6 @@ app:
   version: "1.0.0"
   environment: "prod"  # dev, test, prod
 
-  # 服务发现
-  discovery:
-    nacos:
-      server_addr: "127.0.0.1:8848"
-      namespace: "public"
-      group: "DEFAULT_GROUP"
-      cluster_name: "DEFAULT"
-
-  # 服务配置
-  service:
-    ima:
-      instance_id: "auto"  # 自动生成实例ID
-      weight: 100
-      healthy: true
-      enabled: true
-
-    # 依赖服务配置
-    dependencies:
-      muc_service:
-        name: "muc-service"
-        version: "1.0.0"
-        group: "dev"
-
-      msg_service:
-        name: "msg-service"
-        version: "1.0.0"
-        group: "dev"
-
-      push_service:
-        name: "push-service"
-        version: "1.0.0"
-        group: "dev"
-
   # 安全配置
   security:
     token_validation:

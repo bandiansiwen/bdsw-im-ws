@@ -4,8 +4,8 @@ import (
 	"bdsw-im-ws/api/common"
 	"bdsw-im-ws/api/ima_gateway"
 	"bdsw-im-ws/api/muc"
-	"bdsw-im-ws/api/server_push"
-	"bdsw-im-ws/internal/dubbo/client"
+	"bdsw-im-ws/internal/config"
+	"bdsw-im-ws/internal/dubbo/consumer"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,15 +22,11 @@ import (
 type GatewayService struct {
 	instanceID  string
 	redisClient *redis.Client
-	dubboClient *client.Client
+	dubboClient *consumer.IMAServiceConsumer
 
 	// 连接管理
 	userConnections *UserConnectionManager
 	websocketServer *WebSocketServer
-
-	// 流式连接
-	serverPushStream server_push.ServerPushStreamClient
-	streamMutex      sync.RWMutex
 
 	// Token 缓存
 	tokenCache *TokenCache
@@ -51,7 +47,7 @@ func NewGatewayService(redisClient *redis.Client) *GatewayService {
 		redisClient:     redisClient,
 		userConnections: NewUserConnectionManager(),
 		websocketServer: NewWebSocketServer(&WebSocketConfig{
-			Port:            "8888",
+			Port:            config.GetConfig().WebSocket.Server.Port,
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		}),
@@ -60,7 +56,7 @@ func NewGatewayService(redisClient *redis.Client) *GatewayService {
 	}
 }
 
-func (s *GatewayService) SetDubboClient(client *client.Client) {
+func (s *GatewayService) SetDubboClient(client *consumer.IMAServiceConsumer) {
 	s.dubboClient = client
 }
 
@@ -72,16 +68,10 @@ func (s *GatewayService) Start() error {
 		return fmt.Errorf("service already started")
 	}
 
-	// 1. 启动 WebSocket 服务器
+	// 启动 WebSocket 服务器
 	go s.websocketServer.Start(s.handleWebSocketConnection)
 
-	// 2. 连接到业务服务的推送流
-	//go s.connectToServerPushStream()
-
-	// 3. 启动健康检查
-	go s.startHealthCheck()
-
-	// 4. 启动统计报告
+	// 启动统计报告
 	go s.startStatsReporter()
 
 	s.started = true
@@ -101,11 +91,6 @@ func (s *GatewayService) Shutdown(ctx context.Context) error {
 
 	// 关闭信号通道
 	close(s.shutdownChan)
-
-	// 1. 关闭推送流
-	if s.serverPushStream != nil {
-		s.serverPushStream.CloseSend()
-	}
 
 	// 2. 关闭所有 WebSocket 连接
 	s.websocketServer.Shutdown()
@@ -329,69 +314,6 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 	}
 }
 
-func (s *GatewayService) connectToServerPushStream() {
-	for {
-		select {
-		case <-s.shutdownChan:
-			return
-		default:
-			if s.dubboClient == nil {
-				time.Sleep(2 * time.Second)
-				continue
-			}
-
-			stream, err := s.dubboClient.ServerPushService.RegisterPushStream(context.Background())
-			if err != nil {
-				log.Printf("Failed to connect to server push stream: %v. Retrying in 5s...", err)
-				time.Sleep(5 * time.Second)
-				continue
-			}
-
-			s.streamMutex.Lock()
-			s.serverPushStream = stream
-			s.streamMutex.Unlock()
-
-			log.Println("Connected to server push stream successfully")
-
-			// 发送初始心跳
-			s.sendHeartbeat(stream)
-
-			// 处理服务端推送消息
-			for {
-				select {
-				case <-s.shutdownChan:
-					return
-				default:
-					pushRequest, err := stream.Recv()
-					if err != nil {
-						log.Printf("Server push stream error: %v", err)
-						break
-					}
-					s.handleServerPush(pushRequest)
-				}
-			}
-
-			s.streamMutex.Lock()
-			s.serverPushStream = nil
-			s.streamMutex.Unlock()
-
-			time.Sleep(2 * time.Second)
-		}
-	}
-}
-
-func (s *GatewayService) sendHeartbeat(stream server_push.ServerPushStreamClient) {
-	heartbeat := &server_push.Heartbeat{
-		ImaInstance: s.instanceID,
-		Timestamp:   time.Now().Unix(),
-		OnlineCount: int32(s.userConnections.GetOnlineCount()),
-	}
-
-	if err := stream.Send(heartbeat); err != nil {
-		log.Printf("Failed to send heartbeat: %v", err)
-	}
-}
-
 func (s *GatewayService) handleServerPush(pushRequest *ima_gateway.PushRequest) {
 	log.Printf("Received server push for user: %s, device: %s", pushRequest.UserId, pushRequest.DeviceId)
 
@@ -467,28 +389,6 @@ func (s *GatewayService) registerUserConnection(userID, deviceID string, authRes
 func (s *GatewayService) unregisterUserConnection(userID, deviceID string) {
 	if err := s.redisClient.RemoveUserConnection(userID, deviceID); err != nil {
 		log.Printf("Failed to unregister user %s from Redis: %v", userID, err)
-	}
-}
-
-func (s *GatewayService) startHealthCheck() {
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-s.shutdownChan:
-			return
-		case <-ticker.C:
-			// 发送心跳到推送流
-			s.streamMutex.RLock()
-			if s.serverPushStream != nil {
-				s.sendHeartbeat(s.serverPushStream)
-			}
-			s.streamMutex.RUnlock()
-
-			// 更新实例状态
-			s.updateInstanceStatus()
-		}
 	}
 }
 

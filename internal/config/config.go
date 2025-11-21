@@ -14,7 +14,6 @@ type Config struct {
 	App       AppConfig       `yaml:"app"`
 	Redis     RedisConfig     `yaml:"redis"`
 	WebSocket WebSocketConfig `yaml:"websocket"`
-	Dubbo     DubboConfig     `yaml:"dubbo"`
 }
 
 // AppConfig 应用配置
@@ -90,85 +89,6 @@ type RateLimitConfig struct {
 	Enabled           bool `yaml:"enabled"`
 	RequestsPerSecond int  `yaml:"requests_per_second"`
 	Burst             int  `yaml:"burst"`
-}
-
-// DubboConfig Dubbo配置
-type DubboConfig struct {
-	Application DubboApplicationConfig         `yaml:"application"`
-	Registries  map[string]DubboRegistryConfig `yaml:"registries"`
-	Protocols   map[string]DubboProtocolConfig `yaml:"protocols"`
-	Provider    DubboProviderConfig            `yaml:"provider"`
-	Consumer    DubboConsumerConfig            `yaml:"consumer"`
-}
-
-type DubboApplicationConfig struct {
-	Name         string `yaml:"name"`
-	Version      string `yaml:"version"`
-	Organization string `yaml:"organization"`
-	Module       string `yaml:"module"`
-	Environment  string `yaml:"environment"`
-}
-
-type DubboRegistryConfig struct {
-	Protocol  string `yaml:"protocol"`
-	Address   string `yaml:"address"`
-	Namespace string `yaml:"namespace"`
-	Timeout   string `yaml:"timeout"`
-	Username  string `yaml:"username"`
-	Password  string `yaml:"password"`
-}
-
-type DubboProtocolConfig struct {
-	Name          string `yaml:"name"`
-	Port          int    `yaml:"port"`
-	Serialization string `yaml:"serialization"`
-}
-
-type DubboProviderConfig struct {
-	Filter   string                        `yaml:"filter"`
-	Services map[string]DubboServiceConfig `yaml:"services"`
-}
-
-type DubboConsumerConfig struct {
-	Check          bool                            `yaml:"check"`
-	RequestTimeout string                          `yaml:"request_timeout"`
-	ConnectTimeout string                          `yaml:"connect_timeout"`
-	ClientNumber   int                             `yaml:"client_number"`
-	PoolSize       int                             `yaml:"pool_size"`
-	PoolTTL        int                             `yaml:"pool_ttl"`
-	References     map[string]DubboReferenceConfig `yaml:"references"`
-}
-
-type DubboServiceConfig struct {
-	Interface     string              `yaml:"interface"`
-	Version       string              `yaml:"version"`
-	Group         string              `yaml:"group"`
-	Protocol      string              `yaml:"protocol"`
-	Serialization string              `yaml:"serialization"`
-	Cluster       string              `yaml:"cluster"`
-	Loadbalance   string              `yaml:"loadbalance"`
-	Warmup        string              `yaml:"warmup"`
-	Retries       int                 `yaml:"retries"`
-	Methods       []DubboMethodConfig `yaml:"methods"`
-}
-
-type DubboReferenceConfig struct {
-	Protocol      string              `yaml:"protocol"`
-	Interface     string              `yaml:"interface"`
-	Version       string              `yaml:"version"`
-	Group         string              `yaml:"group"`
-	Cluster       string              `yaml:"cluster"`
-	Loadbalance   string              `yaml:"loadbalance"`
-	Serialization string              `yaml:"serialization"`
-	Timeout       string              `yaml:"timeout"`
-	Retries       int                 `yaml:"retries"`
-	Async         bool                `yaml:"async"`
-	Methods       []DubboMethodConfig `yaml:"methods"`
-}
-
-type DubboMethodConfig struct {
-	Name    string `yaml:"name"`
-	Retries int    `yaml:"retries"`
 }
 
 // 其他配置结构...
@@ -280,8 +200,8 @@ func loadConfigFiles(configPaths ...string) (*Config, error) {
 			"config/app_dev.yml",
 			"config/redis/redis.yml",
 			"config/websocket/websocket.yml",
-			"config/dubbo/client.yml",
-			"config/dubbo/server.yml",
+			"config/dubbo/consumer.yml",
+			"config/dubbo/dubbo.yml",
 		}
 	}
 
@@ -321,8 +241,8 @@ func InitConfig() error {
 		filepath.Join(configDir, "app_dev.yml"),
 		filepath.Join(configDir, "redis/redis.yml"),
 		filepath.Join(configDir, "websocket/websocket.yml"),
-		filepath.Join(configDir, "dubbo/client.yml"),
-		filepath.Join(configDir, "dubbo/server.yml"),
+		filepath.Join(configDir, "dubbo/consumer.yml"),
+		filepath.Join(configDir, "dubbo/dubbo.yml"),
 	}
 
 	_, err := LoadConfig(configPaths...)

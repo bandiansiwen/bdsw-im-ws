@@ -1,6 +1,6 @@
 websocket:
   server:
-    port: "8080"
+    port: "8888"
     read_buffer_size: 1024
     write_buffer_size: 1024
     max_message_size: 65536   # 64KB

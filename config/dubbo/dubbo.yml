@@ -1,0 +1,111 @@
+dubbo:
+  # 修改应用配置
+  application:
+    name: "bdsw-im-ws"
+#    organization: "dubbo-go"
+#    module: "bdsw-im-ws"
+    version: "1.0.0"
+#    environment: "dev"
+#    # 添加元数据类型配置
+    metadata-type: remote
+
+  registries:
+    nacos:
+      protocol: nacos
+      address: 127.0.0.1:8848
+      namespace: public
+      group: DEFAULT_GROUP
+      username: nacos
+      password: nacos
+      timeout: 5s
+
+  protocols:
+    triple:
+      name: tri
+      port: 20000
+      serialization: protobuf  # 使用 protobuf 序列化
+
+  metadata-report:
+    protocol: nacos
+    address: 127.0.0.1:8848
+    username: nacos
+    password: nacos
+    group: dubbo  # 注意：这里group应该设置为dubbo，与Java服务一致
+    namespace: public
+
+  provider:
+    services:
+      IMAGatewayService:
+        interface: "IMAGatewayService"  # 服务接口名
+        version: "1.0.0"
+        group: "dev"
+        protocol: tri
+        serialization: protobuf
+        cluster: "failover"
+        loadbalance: "random"
+        warmup: "100"
+        retries: 3
+        methods:
+          - name: "PushToUser"
+            retries: 1
+          - name: "PushToUsers"
+            retries: 2
+          - name: "Broadcast"
+            retries: 1
+          - name: "KickUser"
+            retries: 1
+
+#  consumer:
+#    check: false
+#    request_timeout: "10s"
+#    connect_timeout: "5s"
+#    client_number: 10
+#    pool_size: 200
+#    pool_ttl: 600
+#    references:
+#      BusinessMessageService:
+#        protocol: tri
+#        interface: "bdsw-im-ws/api/business_message.BusinessMessageService"  # MSG 服务接口
+#        # 添加 provided-by 配置
+#        provided-by: "bdsw-im-ws"
+#        version: "1.0.0"
+#        group: "dev"
+#        cluster: "failover"
+#        loadbalance: "random"
+#        serialization: "protobuf"
+#        timeout: "10s"
+#        retries: 3
+#        methods:
+#          - name: "HandleClientMessage"
+#            retries: 2
+#
+#      MUCService:
+#        protocol: tri
+#        interface: "bdsw-im-ws/api/muc.MUCService"              # MUC 服务接口
+#        # 添加 provided-by 配置
+#        provided-by: "bdsw-im-ws"
+#        version: "1.0.0"
+#        group: "dev"
+#        cluster: "failover"
+#        loadbalance: "random"
+#        serialization: "protobuf"
+#        timeout: "5s"
+#        retries: 2
+#        methods:
+#          - name: "ValidateToken"
+#            retries: 1
+#          - name: "KickUser"
+#            retries: 1
+
+  logger:
+    zap-config:
+      level: "info"
+      development: false
+      encoding: "console"
+      output-paths:
+        - "stdout"
+        - "./logs/ima-gateway.log"
+      error-output-paths:
+        - "stderr"
+      initial-fields:
+        service: "ima-gateway"
