@@ -2,12 +2,14 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v6.32.1
-// source: api/business_message/business_message.proto
+// source: api/msg/msg.proto
 
-package business_message
+// Java 包的命名空间
+
+package msg
 
 import (
-	common "bdsw-im-ws/api/common"
+	common "github.com/bdsw/bdsw-im-ws/api/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -32,7 +34,7 @@ type HandleBatchMessagesRequest struct {
 
 func (x *HandleBatchMessagesRequest) Reset() {
 	*x = HandleBatchMessagesRequest{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[0]
+	mi := &file_api_msg_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +46,7 @@ func (x *HandleBatchMessagesRequest) String() string {
 func (*HandleBatchMessagesRequest) ProtoMessage() {}
 
 func (x *HandleBatchMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[0]
+	mi := &file_api_msg_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +59,7 @@ func (x *HandleBatchMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandleBatchMessagesRequest.ProtoReflect.Descriptor instead.
 func (*HandleBatchMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{0}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *HandleBatchMessagesRequest) GetMessages() []*common.ClientMessage {
@@ -80,7 +82,7 @@ type HandleBatchMessagesResponse struct {
 
 func (x *HandleBatchMessagesResponse) Reset() {
 	*x = HandleBatchMessagesResponse{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[1]
+	mi := &file_api_msg_msg_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -92,7 +94,7 @@ func (x *HandleBatchMessagesResponse) String() string {
 func (*HandleBatchMessagesResponse) ProtoMessage() {}
 
 func (x *HandleBatchMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[1]
+	mi := &file_api_msg_msg_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -105,7 +107,7 @@ func (x *HandleBatchMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandleBatchMessagesResponse.ProtoReflect.Descriptor instead.
 func (*HandleBatchMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{1}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *HandleBatchMessagesResponse) GetBase() *common.BaseResponse {
@@ -153,7 +155,7 @@ type SessionInfo struct {
 
 func (x *SessionInfo) Reset() {
 	*x = SessionInfo{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[2]
+	mi := &file_api_msg_msg_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -165,7 +167,7 @@ func (x *SessionInfo) String() string {
 func (*SessionInfo) ProtoMessage() {}
 
 func (x *SessionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[2]
+	mi := &file_api_msg_msg_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -178,7 +180,7 @@ func (x *SessionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionInfo.ProtoReflect.Descriptor instead.
 func (*SessionInfo) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{2}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SessionInfo) GetSessionId() string {
@@ -248,7 +250,7 @@ type GetUserSessionsRequest struct {
 
 func (x *GetUserSessionsRequest) Reset() {
 	*x = GetUserSessionsRequest{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[3]
+	mi := &file_api_msg_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -260,7 +262,7 @@ func (x *GetUserSessionsRequest) String() string {
 func (*GetUserSessionsRequest) ProtoMessage() {}
 
 func (x *GetUserSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[3]
+	mi := &file_api_msg_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -273,7 +275,7 @@ func (x *GetUserSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserSessionsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{3}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetUserSessionsRequest) GetUserId() string {
@@ -302,7 +304,7 @@ type GetUserSessionsResponse struct {
 
 func (x *GetUserSessionsResponse) Reset() {
 	*x = GetUserSessionsResponse{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[4]
+	mi := &file_api_msg_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -314,7 +316,7 @@ func (x *GetUserSessionsResponse) String() string {
 func (*GetUserSessionsResponse) ProtoMessage() {}
 
 func (x *GetUserSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[4]
+	mi := &file_api_msg_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +329,7 @@ func (x *GetUserSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserSessionsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{4}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetUserSessionsResponse) GetBase() *common.BaseResponse {
@@ -365,7 +367,7 @@ type GetChatHistoryRequest struct {
 
 func (x *GetChatHistoryRequest) Reset() {
 	*x = GetChatHistoryRequest{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[5]
+	mi := &file_api_msg_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -377,7 +379,7 @@ func (x *GetChatHistoryRequest) String() string {
 func (*GetChatHistoryRequest) ProtoMessage() {}
 
 func (x *GetChatHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[5]
+	mi := &file_api_msg_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -390,7 +392,7 @@ func (x *GetChatHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatHistoryRequest.ProtoReflect.Descriptor instead.
 func (*GetChatHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{5}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetChatHistoryRequest) GetSessionId() string {
@@ -440,7 +442,7 @@ type GetChatHistoryResponse struct {
 
 func (x *GetChatHistoryResponse) Reset() {
 	*x = GetChatHistoryResponse{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[6]
+	mi := &file_api_msg_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -452,7 +454,7 @@ func (x *GetChatHistoryResponse) String() string {
 func (*GetChatHistoryResponse) ProtoMessage() {}
 
 func (x *GetChatHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[6]
+	mi := &file_api_msg_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -465,7 +467,7 @@ func (x *GetChatHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatHistoryResponse.ProtoReflect.Descriptor instead.
 func (*GetChatHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{6}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetChatHistoryResponse) GetBase() *common.BaseResponse {
@@ -502,7 +504,7 @@ type MessageReadRequest struct {
 
 func (x *MessageReadRequest) Reset() {
 	*x = MessageReadRequest{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[7]
+	mi := &file_api_msg_msg_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -514,7 +516,7 @@ func (x *MessageReadRequest) String() string {
 func (*MessageReadRequest) ProtoMessage() {}
 
 func (x *MessageReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[7]
+	mi := &file_api_msg_msg_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -527,7 +529,7 @@ func (x *MessageReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageReadRequest.ProtoReflect.Descriptor instead.
 func (*MessageReadRequest) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{7}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *MessageReadRequest) GetUserId() string {
@@ -570,7 +572,7 @@ type RecallMessageRequest struct {
 
 func (x *RecallMessageRequest) Reset() {
 	*x = RecallMessageRequest{}
-	mi := &file_api_business_message_business_message_proto_msgTypes[8]
+	mi := &file_api_msg_msg_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -582,7 +584,7 @@ func (x *RecallMessageRequest) String() string {
 func (*RecallMessageRequest) ProtoMessage() {}
 
 func (x *RecallMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_business_message_business_message_proto_msgTypes[8]
+	mi := &file_api_msg_msg_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -595,7 +597,7 @@ func (x *RecallMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecallMessageRequest.ProtoReflect.Descriptor instead.
 func (*RecallMessageRequest) Descriptor() ([]byte, []int) {
-	return file_api_business_message_business_message_proto_rawDescGZIP(), []int{8}
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *RecallMessageRequest) GetUserId() string {
@@ -619,16 +621,85 @@ func (x *RecallMessageRequest) GetReason() string {
 	return ""
 }
 
-var File_api_business_message_business_message_proto protoreflect.FileDescriptor
+// 踢用户下线请求
+type KickUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"` // multi_login, admin_kick, system_maintenance
+	Operator      string                 `protobuf:"bytes,4,opt,name=operator,proto3" json:"operator,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_api_business_message_business_message_proto_rawDesc = "" +
+func (x *KickUserRequest) Reset() {
+	*x = KickUserRequest{}
+	mi := &file_api_msg_msg_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KickUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KickUserRequest) ProtoMessage() {}
+
+func (x *KickUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_msg_msg_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KickUserRequest.ProtoReflect.Descriptor instead.
+func (*KickUserRequest) Descriptor() ([]byte, []int) {
+	return file_api_msg_msg_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *KickUserRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *KickUserRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *KickUserRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *KickUserRequest) GetOperator() string {
+	if x != nil {
+		return x.Operator
+	}
+	return ""
+}
+
+var File_api_msg_msg_proto protoreflect.FileDescriptor
+
+const file_api_msg_msg_proto_rawDesc = "" +
 	"\n" +
-	"+api/business_message/business_message.proto\x12\x10business_message\x1a\x17api/common/common.proto\"O\n" +
-	"\x1aHandleBatchMessagesRequest\x121\n" +
-	"\bmessages\x18\x01 \x03(\v2\x15.common.ClientMessageR\bmessages\"\xc0\x01\n" +
-	"\x1bHandleBatchMessagesResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x123\n" +
-	"\tresponses\x18\x02 \x03(\v2\x15.common.ServerMessageR\tresponses\x12#\n" +
+	"\x11api/msg/msg.proto\x12\fcom.bdsw.msg\x1a\x17api/common/common.proto\"X\n" +
+	"\x1aHandleBatchMessagesRequest\x12:\n" +
+	"\bmessages\x18\x01 \x03(\v2\x1e.com.bdsw.common.ClientMessageR\bmessages\"\xd2\x01\n" +
+	"\x1bHandleBatchMessagesResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12<\n" +
+	"\tresponses\x18\x02 \x03(\v2\x1e.com.bdsw.common.ServerMessageR\tresponses\x12#\n" +
 	"\rsuccess_count\x18\x03 \x01(\x05R\fsuccessCount\x12\x1d\n" +
 	"\n" +
 	"fail_count\x18\x04 \x01(\x05R\tfailCount\"\x89\x02\n" +
@@ -641,26 +712,26 @@ const file_api_business_message_business_message_proto_rawDesc = "" +
 	"\x11last_message_time\x18\x05 \x01(\x03R\x0flastMessageTime\x12!\n" +
 	"\funread_count\x18\x06 \x01(\x05R\vunreadCount\x12\x15\n" +
 	"\x06is_top\x18\a \x01(\bR\x05isTop\x12\x12\n" +
-	"\x04mute\x18\b \x01(\bR\x04mute\"Z\n" +
+	"\x04mute\x18\b \x01(\bR\x04mute\"c\n" +
 	"\x16GetUserSessionsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12'\n" +
-	"\x04page\x18\x02 \x01(\v2\x13.common.PageRequestR\x04page\"\xa8\x01\n" +
-	"\x17GetUserSessionsResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x129\n" +
-	"\bsessions\x18\x02 \x03(\v2\x1d.business_message.SessionInfoR\bsessions\x12(\n" +
-	"\x04page\x18\x03 \x01(\v2\x14.common.PageResponseR\x04page\"\xb2\x01\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x120\n" +
+	"\x04page\x18\x02 \x01(\v2\x1c.com.bdsw.common.PageRequestR\x04page\"\xb6\x01\n" +
+	"\x17GetUserSessionsResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x125\n" +
+	"\bsessions\x18\x02 \x03(\v2\x19.com.bdsw.msg.SessionInfoR\bsessions\x121\n" +
+	"\x04page\x18\x03 \x01(\v2\x1d.com.bdsw.common.PageResponseR\x04page\"\xbb\x01\n" +
 	"\x15GetChatHistoryRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
 	"start_time\x18\x03 \x01(\x03R\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x04 \x01(\x03R\aendTime\x12'\n" +
-	"\x04page\x18\x05 \x01(\v2\x13.common.PageRequestR\x04page\"\x9f\x01\n" +
-	"\x16GetChatHistoryResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x121\n" +
-	"\bmessages\x18\x02 \x03(\v2\x15.common.ServerMessageR\bmessages\x12(\n" +
-	"\x04page\x18\x03 \x01(\v2\x14.common.PageResponseR\x04page\"\x88\x01\n" +
+	"\bend_time\x18\x04 \x01(\x03R\aendTime\x120\n" +
+	"\x04page\x18\x05 \x01(\v2\x1c.com.bdsw.common.PageRequestR\x04page\"\xba\x01\n" +
+	"\x16GetChatHistoryResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12:\n" +
+	"\bmessages\x18\x02 \x03(\v2\x1e.com.bdsw.common.ServerMessageR\bmessages\x121\n" +
+	"\x04page\x18\x03 \x01(\v2\x1d.com.bdsw.common.PageResponseR\x04page\"\x88\x01\n" +
 	"\x12MessageReadRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
@@ -672,76 +743,106 @@ const file_api_business_message_business_message_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x02 \x01(\tR\tmessageId\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reasonB!Z\x1fbdsw-im-ws/api/business_messageb\x06proto3"
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"{\n" +
+	"\x0fKickUserRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x12\x1a\n" +
+	"\boperator\x18\x04 \x01(\tR\boperator2\x8c\x05\n" +
+	"\n" +
+	"MsgService\x12W\n" +
+	"\x13HandleClientMessage\x12\x1e.com.bdsw.common.ClientMessage\x1a\x1e.com.bdsw.common.ServerMessage\"\x00\x12l\n" +
+	"\x13HandleBatchMessages\x12(.com.bdsw.msg.HandleBatchMessagesRequest\x1a).com.bdsw.msg.HandleBatchMessagesResponse\"\x00\x12`\n" +
+	"\x0fGetUserSessions\x12$.com.bdsw.msg.GetUserSessionsRequest\x1a%.com.bdsw.msg.GetUserSessionsResponse\"\x00\x12]\n" +
+	"\x0eGetChatHistory\x12#.com.bdsw.msg.GetChatHistoryRequest\x1a$.com.bdsw.msg.GetChatHistoryResponse\"\x00\x12T\n" +
+	"\x0fMarkMessageRead\x12 .com.bdsw.msg.MessageReadRequest\x1a\x1d.com.bdsw.common.BaseResponse\"\x00\x12T\n" +
+	"\rRecallMessage\x12\".com.bdsw.msg.RecallMessageRequest\x1a\x1d.com.bdsw.common.BaseResponse\"\x00\x12J\n" +
+	"\bKickUser\x12\x1d.com.bdsw.msg.KickUserRequest\x1a\x1d.com.bdsw.common.BaseResponse\"\x00BB\n" +
+	"\fcom.bdsw.msgB\bMsgProtoP\x01Z&github.com/bdsw/bdsw-im-ws/api/msg;msgb\x06proto3"
 
 var (
-	file_api_business_message_business_message_proto_rawDescOnce sync.Once
-	file_api_business_message_business_message_proto_rawDescData []byte
+	file_api_msg_msg_proto_rawDescOnce sync.Once
+	file_api_msg_msg_proto_rawDescData []byte
 )
 
-func file_api_business_message_business_message_proto_rawDescGZIP() []byte {
-	file_api_business_message_business_message_proto_rawDescOnce.Do(func() {
-		file_api_business_message_business_message_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_business_message_business_message_proto_rawDesc), len(file_api_business_message_business_message_proto_rawDesc)))
+func file_api_msg_msg_proto_rawDescGZIP() []byte {
+	file_api_msg_msg_proto_rawDescOnce.Do(func() {
+		file_api_msg_msg_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_msg_msg_proto_rawDesc), len(file_api_msg_msg_proto_rawDesc)))
 	})
-	return file_api_business_message_business_message_proto_rawDescData
+	return file_api_msg_msg_proto_rawDescData
 }
 
-var file_api_business_message_business_message_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_api_business_message_business_message_proto_goTypes = []any{
-	(*HandleBatchMessagesRequest)(nil),  // 0: business_message.HandleBatchMessagesRequest
-	(*HandleBatchMessagesResponse)(nil), // 1: business_message.HandleBatchMessagesResponse
-	(*SessionInfo)(nil),                 // 2: business_message.SessionInfo
-	(*GetUserSessionsRequest)(nil),      // 3: business_message.GetUserSessionsRequest
-	(*GetUserSessionsResponse)(nil),     // 4: business_message.GetUserSessionsResponse
-	(*GetChatHistoryRequest)(nil),       // 5: business_message.GetChatHistoryRequest
-	(*GetChatHistoryResponse)(nil),      // 6: business_message.GetChatHistoryResponse
-	(*MessageReadRequest)(nil),          // 7: business_message.MessageReadRequest
-	(*RecallMessageRequest)(nil),        // 8: business_message.RecallMessageRequest
-	(*common.ClientMessage)(nil),        // 9: common.ClientMessage
-	(*common.BaseResponse)(nil),         // 10: common.BaseResponse
-	(*common.ServerMessage)(nil),        // 11: common.ServerMessage
-	(*common.PageRequest)(nil),          // 12: common.PageRequest
-	(*common.PageResponse)(nil),         // 13: common.PageResponse
+var file_api_msg_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_api_msg_msg_proto_goTypes = []any{
+	(*HandleBatchMessagesRequest)(nil),  // 0: com.bdsw.msg.HandleBatchMessagesRequest
+	(*HandleBatchMessagesResponse)(nil), // 1: com.bdsw.msg.HandleBatchMessagesResponse
+	(*SessionInfo)(nil),                 // 2: com.bdsw.msg.SessionInfo
+	(*GetUserSessionsRequest)(nil),      // 3: com.bdsw.msg.GetUserSessionsRequest
+	(*GetUserSessionsResponse)(nil),     // 4: com.bdsw.msg.GetUserSessionsResponse
+	(*GetChatHistoryRequest)(nil),       // 5: com.bdsw.msg.GetChatHistoryRequest
+	(*GetChatHistoryResponse)(nil),      // 6: com.bdsw.msg.GetChatHistoryResponse
+	(*MessageReadRequest)(nil),          // 7: com.bdsw.msg.MessageReadRequest
+	(*RecallMessageRequest)(nil),        // 8: com.bdsw.msg.RecallMessageRequest
+	(*KickUserRequest)(nil),             // 9: com.bdsw.msg.KickUserRequest
+	(*common.ClientMessage)(nil),        // 10: com.bdsw.common.ClientMessage
+	(*common.BaseResponse)(nil),         // 11: com.bdsw.common.BaseResponse
+	(*common.ServerMessage)(nil),        // 12: com.bdsw.common.ServerMessage
+	(*common.PageRequest)(nil),          // 13: com.bdsw.common.PageRequest
+	(*common.PageResponse)(nil),         // 14: com.bdsw.common.PageResponse
 }
-var file_api_business_message_business_message_proto_depIdxs = []int32{
-	9,  // 0: business_message.HandleBatchMessagesRequest.messages:type_name -> common.ClientMessage
-	10, // 1: business_message.HandleBatchMessagesResponse.base:type_name -> common.BaseResponse
-	11, // 2: business_message.HandleBatchMessagesResponse.responses:type_name -> common.ServerMessage
-	12, // 3: business_message.GetUserSessionsRequest.page:type_name -> common.PageRequest
-	10, // 4: business_message.GetUserSessionsResponse.base:type_name -> common.BaseResponse
-	2,  // 5: business_message.GetUserSessionsResponse.sessions:type_name -> business_message.SessionInfo
-	13, // 6: business_message.GetUserSessionsResponse.page:type_name -> common.PageResponse
-	12, // 7: business_message.GetChatHistoryRequest.page:type_name -> common.PageRequest
-	10, // 8: business_message.GetChatHistoryResponse.base:type_name -> common.BaseResponse
-	11, // 9: business_message.GetChatHistoryResponse.messages:type_name -> common.ServerMessage
-	13, // 10: business_message.GetChatHistoryResponse.page:type_name -> common.PageResponse
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
+var file_api_msg_msg_proto_depIdxs = []int32{
+	10, // 0: com.bdsw.msg.HandleBatchMessagesRequest.messages:type_name -> com.bdsw.common.ClientMessage
+	11, // 1: com.bdsw.msg.HandleBatchMessagesResponse.base:type_name -> com.bdsw.common.BaseResponse
+	12, // 2: com.bdsw.msg.HandleBatchMessagesResponse.responses:type_name -> com.bdsw.common.ServerMessage
+	13, // 3: com.bdsw.msg.GetUserSessionsRequest.page:type_name -> com.bdsw.common.PageRequest
+	11, // 4: com.bdsw.msg.GetUserSessionsResponse.base:type_name -> com.bdsw.common.BaseResponse
+	2,  // 5: com.bdsw.msg.GetUserSessionsResponse.sessions:type_name -> com.bdsw.msg.SessionInfo
+	14, // 6: com.bdsw.msg.GetUserSessionsResponse.page:type_name -> com.bdsw.common.PageResponse
+	13, // 7: com.bdsw.msg.GetChatHistoryRequest.page:type_name -> com.bdsw.common.PageRequest
+	11, // 8: com.bdsw.msg.GetChatHistoryResponse.base:type_name -> com.bdsw.common.BaseResponse
+	12, // 9: com.bdsw.msg.GetChatHistoryResponse.messages:type_name -> com.bdsw.common.ServerMessage
+	14, // 10: com.bdsw.msg.GetChatHistoryResponse.page:type_name -> com.bdsw.common.PageResponse
+	10, // 11: com.bdsw.msg.MsgService.HandleClientMessage:input_type -> com.bdsw.common.ClientMessage
+	0,  // 12: com.bdsw.msg.MsgService.HandleBatchMessages:input_type -> com.bdsw.msg.HandleBatchMessagesRequest
+	3,  // 13: com.bdsw.msg.MsgService.GetUserSessions:input_type -> com.bdsw.msg.GetUserSessionsRequest
+	5,  // 14: com.bdsw.msg.MsgService.GetChatHistory:input_type -> com.bdsw.msg.GetChatHistoryRequest
+	7,  // 15: com.bdsw.msg.MsgService.MarkMessageRead:input_type -> com.bdsw.msg.MessageReadRequest
+	8,  // 16: com.bdsw.msg.MsgService.RecallMessage:input_type -> com.bdsw.msg.RecallMessageRequest
+	9,  // 17: com.bdsw.msg.MsgService.KickUser:input_type -> com.bdsw.msg.KickUserRequest
+	12, // 18: com.bdsw.msg.MsgService.HandleClientMessage:output_type -> com.bdsw.common.ServerMessage
+	1,  // 19: com.bdsw.msg.MsgService.HandleBatchMessages:output_type -> com.bdsw.msg.HandleBatchMessagesResponse
+	4,  // 20: com.bdsw.msg.MsgService.GetUserSessions:output_type -> com.bdsw.msg.GetUserSessionsResponse
+	6,  // 21: com.bdsw.msg.MsgService.GetChatHistory:output_type -> com.bdsw.msg.GetChatHistoryResponse
+	11, // 22: com.bdsw.msg.MsgService.MarkMessageRead:output_type -> com.bdsw.common.BaseResponse
+	11, // 23: com.bdsw.msg.MsgService.RecallMessage:output_type -> com.bdsw.common.BaseResponse
+	11, // 24: com.bdsw.msg.MsgService.KickUser:output_type -> com.bdsw.common.BaseResponse
+	18, // [18:25] is the sub-list for method output_type
+	11, // [11:18] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
 	11, // [11:11] is the sub-list for extension extendee
 	0,  // [0:11] is the sub-list for field type_name
 }
 
-func init() { file_api_business_message_business_message_proto_init() }
-func file_api_business_message_business_message_proto_init() {
-	if File_api_business_message_business_message_proto != nil {
+func init() { file_api_msg_msg_proto_init() }
+func file_api_msg_msg_proto_init() {
+	if File_api_msg_msg_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_business_message_business_message_proto_rawDesc), len(file_api_business_message_business_message_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_msg_msg_proto_rawDesc), len(file_api_msg_msg_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
-		GoTypes:           file_api_business_message_business_message_proto_goTypes,
-		DependencyIndexes: file_api_business_message_business_message_proto_depIdxs,
-		MessageInfos:      file_api_business_message_business_message_proto_msgTypes,
+		GoTypes:           file_api_msg_msg_proto_goTypes,
+		DependencyIndexes: file_api_msg_msg_proto_depIdxs,
+		MessageInfos:      file_api_msg_msg_proto_msgTypes,
 	}.Build()
-	File_api_business_message_business_message_proto = out.File
-	file_api_business_message_business_message_proto_goTypes = nil
-	file_api_business_message_business_message_proto_depIdxs = nil
+	File_api_msg_msg_proto = out.File
+	file_api_msg_msg_proto_goTypes = nil
+	file_api_msg_msg_proto_depIdxs = nil
 }

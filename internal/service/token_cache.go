@@ -1,9 +1,10 @@
 package service
 
 import (
-	"bdsw-im-ws/api/muc"
 	"sync"
 	"time"
+
+	"github.com/bdsw/bdsw-im-ws/api/muc"
 )
 
 type tokenCacheEntry struct {

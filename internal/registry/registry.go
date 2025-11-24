@@ -1,12 +1,13 @@
 package registry
 
 import (
-	"bdsw-im-ws/internal/dubbo/consumer"
-	"bdsw-im-ws/internal/dubbo/provider"
-	"bdsw-im-ws/internal/redis"
-	"bdsw-im-ws/internal/service"
 	"context"
 	"fmt"
+
+	"github.com/bdsw/bdsw-im-ws/internal/dubbo/consumer"
+	"github.com/bdsw/bdsw-im-ws/internal/dubbo/provider"
+	"github.com/bdsw/bdsw-im-ws/internal/redis"
+	"github.com/bdsw/bdsw-im-ws/internal/service"
 
 	"dubbo.apache.org/dubbo-go/v3/config"
 	_ "dubbo.apache.org/dubbo-go/v3/imports"
@@ -41,7 +42,6 @@ func NewServiceRegistry(redisClient *redis.Client) (*ServiceRegistry, error) {
 
 // RegisterDubboServices 注册 Dubbo 服务
 func (r *ServiceRegistry) RegisterDubboServices() {
-	config.SetProviderService(r.ServiceProvider)
 	err := config.Load(config.WithPath("config/dubbo/dubbo.yml"))
 	if err != nil {
 		_ = fmt.Errorf("配置加载失败: %v", err)

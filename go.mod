@@ -1,9 +1,11 @@
-module bdsw-im-ws
+module github.com/bdsw/bdsw-im-ws
 
 go 1.25.2
 
 require (
 	dubbo.apache.org/dubbo-go/v3 v3.3.0
+	github.com/dubbogo/grpc-go v1.42.10
+	github.com/dubbogo/triple v1.2.2-rc4
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/prometheus/client_golang v1.23.2
@@ -41,8 +43,6 @@ require (
 	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204 // indirect
 	github.com/dubbogo/go-zookeeper v1.0.4-0.20211212162352-f9d2183d89d5 // indirect
 	github.com/dubbogo/gost v1.14.0 // indirect
-	github.com/dubbogo/grpc-go v1.42.10 // indirect
-	github.com/dubbogo/triple v1.2.2-rc4 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/envoyproxy/go-control-plane v0.11.0 // indirect

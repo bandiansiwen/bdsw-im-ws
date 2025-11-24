@@ -4,6 +4,8 @@
 // 	protoc        v6.32.1
 // source: api/common/common.proto
 
+// Java 包的命名空间
+
 package common
 
 import (
@@ -612,7 +614,7 @@ var File_api_common_common_proto protoreflect.FileDescriptor
 
 const file_api_common_common_proto_rawDesc = "" +
 	"\n" +
-	"\x17api/common/common.proto\x12\x06common\"t\n" +
+	"\x17api/common/common.proto\x12\x0fcom.bdsw.common\"t\n" +
 	"\fBaseResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\x12\x18\n" +
@@ -670,7 +672,8 @@ const file_api_common_common_proto_rawDesc = "" +
 	"\x04data\x18\x04 \x01(\fR\x04data\x12\x1c\n" +
 	"\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1b\n" +
-	"\terror_msg\x18\a \x01(\tR\berrorMsgB\x17Z\x15bdsw-im-ws/api/commonb\x06proto3"
+	"\terror_msg\x18\a \x01(\tR\berrorMsgBN\n" +
+	"\x0fcom.bdsw.commonB\vCommonProtoP\x01Z,github.com/bdsw/bdsw-im-ws/api/common;commonb\x06proto3"
 
 var (
 	file_api_common_common_proto_rawDescOnce sync.Once
@@ -686,13 +689,13 @@ func file_api_common_common_proto_rawDescGZIP() []byte {
 
 var file_api_common_common_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_api_common_common_proto_goTypes = []any{
-	(*BaseResponse)(nil),  // 0: common.BaseResponse
-	(*PageRequest)(nil),   // 1: common.PageRequest
-	(*PageResponse)(nil),  // 2: common.PageResponse
-	(*DeviceInfo)(nil),    // 3: common.DeviceInfo
-	(*UserInfo)(nil),      // 4: common.UserInfo
-	(*ClientMessage)(nil), // 5: common.ClientMessage
-	(*ServerMessage)(nil), // 6: common.ServerMessage
+	(*BaseResponse)(nil),  // 0: com.bdsw.common.BaseResponse
+	(*PageRequest)(nil),   // 1: com.bdsw.common.PageRequest
+	(*PageResponse)(nil),  // 2: com.bdsw.common.PageResponse
+	(*DeviceInfo)(nil),    // 3: com.bdsw.common.DeviceInfo
+	(*UserInfo)(nil),      // 4: com.bdsw.common.UserInfo
+	(*ClientMessage)(nil), // 5: com.bdsw.common.ClientMessage
+	(*ServerMessage)(nil), // 6: com.bdsw.common.ServerMessage
 }
 var file_api_common_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

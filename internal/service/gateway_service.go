@@ -1,11 +1,6 @@
 package service
 
 import (
-	"bdsw-im-ws/api/common"
-	"bdsw-im-ws/api/ima_gateway"
-	"bdsw-im-ws/api/muc"
-	"bdsw-im-ws/internal/config"
-	"bdsw-im-ws/internal/dubbo/consumer"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,8 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"bdsw-im-ws/internal/redis"
-	"bdsw-im-ws/pkg/utils"
+	"github.com/bdsw/bdsw-im-ws/api/common"
+	"github.com/bdsw/bdsw-im-ws/api/ima"
+	"github.com/bdsw/bdsw-im-ws/api/muc"
+	"github.com/bdsw/bdsw-im-ws/internal/config"
+	"github.com/bdsw/bdsw-im-ws/internal/dubbo/consumer"
+
+	"github.com/bdsw/bdsw-im-ws/internal/redis"
+	"github.com/bdsw/bdsw-im-ws/pkg/utils"
 
 	"github.com/gorilla/websocket"
 )
@@ -188,9 +189,9 @@ func (s *GatewayService) validateToken(userID, token, deviceID string) (*muc.Tok
 		Token:    token,
 		DeviceId: deviceID,
 	})
-	if err != nil {
+	if err.GetError() != nil {
 		log.Printf("Token validation RPC error for user %s: %v", userID, err)
-		return nil, err
+		return nil, &err
 	}
 
 	// 3. 缓存验证结果
@@ -290,11 +291,11 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 	}
 
 	// 直接转发到业务服务
-	serverMsg, err := s.dubboClient.BusinessMessageService.HandleClientMessage(
+	serverMsg, err := s.dubboClient.MsgService.HandleClientMessage(
 		context.Background(),
 		&clientMsg,
 	)
-	if err != nil {
+	if err.GetError() != nil {
 		log.Printf("Failed to process message for user %s: %v", userID, err)
 		s.sendErrorToUser(userID, deviceID, "Service temporarily unavailable")
 		return
@@ -314,7 +315,7 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 	}
 }
 
-func (s *GatewayService) handleServerPush(pushRequest *ima_gateway.PushRequest) {
+func (s *GatewayService) handleServerPush(pushRequest *ima.PushRequest) {
 	log.Printf("Received server push for user: %s, device: %s", pushRequest.UserId, pushRequest.DeviceId)
 
 	if pushRequest.UserId == "" {
@@ -436,7 +437,7 @@ func (s *GatewayService) startStatsReporter() {
 }
 
 // PushToUser 实现单用户推送
-func (s *GatewayService) PushToUser(ctx context.Context, req *ima_gateway.PushRequest) (*common.BaseResponse, error) {
+func (s *GatewayService) PushToUser(ctx context.Context, req *ima.PushRequest) (*common.BaseResponse, error) {
 	if err := s.sendServerMessageToUser(req.UserId, req.DeviceId, req.Message); err != nil {
 		return &common.BaseResponse{
 			Success:   false,
@@ -453,7 +454,7 @@ func (s *GatewayService) PushToUser(ctx context.Context, req *ima_gateway.PushRe
 }
 
 // PushToUsers 实现批量推送
-func (s *GatewayService) PushToUsers(ctx context.Context, req *ima_gateway.BatchPushRequest) (*common.BaseResponse, error) {
+func (s *GatewayService) PushToUsers(ctx context.Context, req *ima.BatchPushRequest) (*common.BaseResponse, error) {
 	successCount := 0
 	for _, push := range req.Pushes {
 		if err := s.sendServerMessageToUser(push.UserId, push.DeviceId, push.Message); err != nil {
@@ -471,7 +472,7 @@ func (s *GatewayService) PushToUsers(ctx context.Context, req *ima_gateway.Batch
 }
 
 // Broadcast 实现广播消息
-func (s *GatewayService) Broadcast(ctx context.Context, req *ima_gateway.BroadcastMessage) (*common.BaseResponse, error) {
+func (s *GatewayService) Broadcast(ctx context.Context, req *ima.BroadcastMessage) (*common.BaseResponse, error) {
 	s.broadcastMessage(req.Message)
 
 	return &common.BaseResponse{
@@ -481,7 +482,7 @@ func (s *GatewayService) Broadcast(ctx context.Context, req *ima_gateway.Broadca
 }
 
 // KickUser 实现踢用户下线
-func (s *GatewayService) KickUser(ctx context.Context, req *ima_gateway.KickUserRequest) (*common.BaseResponse, error) {
+func (s *GatewayService) KickUser(ctx context.Context, req *ima.KickUserRequest) (*common.BaseResponse, error) {
 	s.kickExistingConnection(req.UserId, req.DeviceId, req.Reason)
 
 	return &common.BaseResponse{

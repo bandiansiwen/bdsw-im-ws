@@ -1,23 +1,24 @@
 package consumer
 
 import (
-	"bdsw-im-ws/api/business_message"
-	"bdsw-im-ws/api/muc"
 	"log"
+
+	"github.com/bdsw/bdsw-im-ws/api/msg"
+	"github.com/bdsw/bdsw-im-ws/api/muc"
 
 	"dubbo.apache.org/dubbo-go/v3/config"
 )
 
 type IMAServiceConsumer struct {
-	BusinessMessageService business_message.BusinessMessageService
-	MUCService             muc.MUCService
+	MsgService msg.MsgServiceClient
+	MUCService muc.MUCServiceClient
 }
 
 func NewIMAServiceConsumer() (*IMAServiceConsumer, error) {
 	client := &IMAServiceConsumer{}
 
 	// 获取 BusinessMessageService 客户端
-	config.SetConsumerService(&client.BusinessMessageService)
+	config.SetConsumerService(&client.MsgService)
 	// 获取 MUCService 客户端
 	config.SetConsumerService(&client.MUCService)
 

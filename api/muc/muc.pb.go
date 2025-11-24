@@ -7,7 +7,7 @@
 package muc
 
 import (
-	common "bdsw-im-ws/api/common"
+	common "github.com/bdsw/bdsw-im-ws/api/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,6 +22,99 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 设备信息
+type DeviceInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	DeviceType    string                 `protobuf:"bytes,2,opt,name=device_type,json=deviceType,proto3" json:"device_type,omitempty"` // web, android, ios, windows, mac
+	DeviceBrand   string                 `protobuf:"bytes,3,opt,name=device_brand,json=deviceBrand,proto3" json:"device_brand,omitempty"`
+	DeviceModel   string                 `protobuf:"bytes,4,opt,name=device_model,json=deviceModel,proto3" json:"device_model,omitempty"`
+	OsVersion     string                 `protobuf:"bytes,5,opt,name=os_version,json=osVersion,proto3" json:"os_version,omitempty"`
+	AppVersion    string                 `protobuf:"bytes,6,opt,name=app_version,json=appVersion,proto3" json:"app_version,omitempty"`
+	NetworkType   string                 `protobuf:"bytes,7,opt,name=network_type,json=networkType,proto3" json:"network_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeviceInfo) Reset() {
+	*x = DeviceInfo{}
+	mi := &file_api_muc_muc_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeviceInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeviceInfo) ProtoMessage() {}
+
+func (x *DeviceInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_muc_muc_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeviceInfo.ProtoReflect.Descriptor instead.
+func (*DeviceInfo) Descriptor() ([]byte, []int) {
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DeviceInfo) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetDeviceType() string {
+	if x != nil {
+		return x.DeviceType
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetDeviceBrand() string {
+	if x != nil {
+		return x.DeviceBrand
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetDeviceModel() string {
+	if x != nil {
+		return x.DeviceModel
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetOsVersion() string {
+	if x != nil {
+		return x.OsVersion
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetAppVersion() string {
+	if x != nil {
+		return x.AppVersion
+	}
+	return ""
+}
+
+func (x *DeviceInfo) GetNetworkType() string {
+	if x != nil {
+		return x.NetworkType
+	}
+	return ""
+}
+
 // Token 验证请求
 type TokenValidateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -30,14 +123,14 @@ type TokenValidateRequest struct {
 	DeviceId      string                 `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	ClientVersion string                 `protobuf:"bytes,4,opt,name=client_version,json=clientVersion,proto3" json:"client_version,omitempty"`
 	ClientType    string                 `protobuf:"bytes,5,opt,name=client_type,json=clientType,proto3" json:"client_type,omitempty"`
-	DeviceInfo    *common.DeviceInfo     `protobuf:"bytes,6,opt,name=device_info,json=deviceInfo,proto3" json:"device_info,omitempty"`
+	DeviceInfo    *DeviceInfo            `protobuf:"bytes,6,opt,name=device_info,json=deviceInfo,proto3" json:"device_info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TokenValidateRequest) Reset() {
 	*x = TokenValidateRequest{}
-	mi := &file_api_muc_muc_proto_msgTypes[0]
+	mi := &file_api_muc_muc_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +142,7 @@ func (x *TokenValidateRequest) String() string {
 func (*TokenValidateRequest) ProtoMessage() {}
 
 func (x *TokenValidateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[0]
+	mi := &file_api_muc_muc_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +155,7 @@ func (x *TokenValidateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenValidateRequest.ProtoReflect.Descriptor instead.
 func (*TokenValidateRequest) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{0}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *TokenValidateRequest) GetUserId() string {
@@ -100,7 +193,7 @@ func (x *TokenValidateRequest) GetClientType() string {
 	return ""
 }
 
-func (x *TokenValidateRequest) GetDeviceInfo() *common.DeviceInfo {
+func (x *TokenValidateRequest) GetDeviceInfo() *DeviceInfo {
 	if x != nil {
 		return x.DeviceInfo
 	}
@@ -124,7 +217,7 @@ type TokenValidateResponse struct {
 
 func (x *TokenValidateResponse) Reset() {
 	*x = TokenValidateResponse{}
-	mi := &file_api_muc_muc_proto_msgTypes[1]
+	mi := &file_api_muc_muc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -136,7 +229,7 @@ func (x *TokenValidateResponse) String() string {
 func (*TokenValidateResponse) ProtoMessage() {}
 
 func (x *TokenValidateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[1]
+	mi := &file_api_muc_muc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -149,7 +242,7 @@ func (x *TokenValidateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenValidateResponse.ProtoReflect.Descriptor instead.
 func (*TokenValidateResponse) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{1}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TokenValidateResponse) GetBase() *common.BaseResponse {
@@ -220,7 +313,7 @@ type RefreshTokenRequest struct {
 
 func (x *RefreshTokenRequest) Reset() {
 	*x = RefreshTokenRequest{}
-	mi := &file_api_muc_muc_proto_msgTypes[2]
+	mi := &file_api_muc_muc_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -232,7 +325,7 @@ func (x *RefreshTokenRequest) String() string {
 func (*RefreshTokenRequest) ProtoMessage() {}
 
 func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[2]
+	mi := &file_api_muc_muc_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -245,7 +338,7 @@ func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshTokenRequest.ProtoReflect.Descriptor instead.
 func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{2}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RefreshTokenRequest) GetUserId() string {
@@ -282,7 +375,7 @@ type RefreshTokenResponse struct {
 
 func (x *RefreshTokenResponse) Reset() {
 	*x = RefreshTokenResponse{}
-	mi := &file_api_muc_muc_proto_msgTypes[3]
+	mi := &file_api_muc_muc_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -294,7 +387,7 @@ func (x *RefreshTokenResponse) String() string {
 func (*RefreshTokenResponse) ProtoMessage() {}
 
 func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[3]
+	mi := &file_api_muc_muc_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -307,7 +400,7 @@ func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshTokenResponse.ProtoReflect.Descriptor instead.
 func (*RefreshTokenResponse) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{3}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RefreshTokenResponse) GetBase() *common.BaseResponse {
@@ -348,7 +441,7 @@ type GetUserPermissionsRequest struct {
 
 func (x *GetUserPermissionsRequest) Reset() {
 	*x = GetUserPermissionsRequest{}
-	mi := &file_api_muc_muc_proto_msgTypes[4]
+	mi := &file_api_muc_muc_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -360,7 +453,7 @@ func (x *GetUserPermissionsRequest) String() string {
 func (*GetUserPermissionsRequest) ProtoMessage() {}
 
 func (x *GetUserPermissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[4]
+	mi := &file_api_muc_muc_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -373,7 +466,7 @@ func (x *GetUserPermissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPermissionsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserPermissionsRequest) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{4}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetUserPermissionsRequest) GetUserId() string {
@@ -395,7 +488,7 @@ type GetUserPermissionsResponse struct {
 
 func (x *GetUserPermissionsResponse) Reset() {
 	*x = GetUserPermissionsResponse{}
-	mi := &file_api_muc_muc_proto_msgTypes[5]
+	mi := &file_api_muc_muc_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -407,7 +500,7 @@ func (x *GetUserPermissionsResponse) String() string {
 func (*GetUserPermissionsResponse) ProtoMessage() {}
 
 func (x *GetUserPermissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[5]
+	mi := &file_api_muc_muc_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -420,7 +513,7 @@ func (x *GetUserPermissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPermissionsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserPermissionsResponse) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{5}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetUserPermissionsResponse) GetBase() *common.BaseResponse {
@@ -456,7 +549,7 @@ type LogoutRequest struct {
 
 func (x *LogoutRequest) Reset() {
 	*x = LogoutRequest{}
-	mi := &file_api_muc_muc_proto_msgTypes[6]
+	mi := &file_api_muc_muc_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -468,7 +561,7 @@ func (x *LogoutRequest) String() string {
 func (*LogoutRequest) ProtoMessage() {}
 
 func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[6]
+	mi := &file_api_muc_muc_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -481,7 +574,7 @@ func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
 func (*LogoutRequest) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{6}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *LogoutRequest) GetUserId() string {
@@ -518,7 +611,7 @@ type LoginRequest struct {
 
 func (x *LoginRequest) Reset() {
 	*x = LoginRequest{}
-	mi := &file_api_muc_muc_proto_msgTypes[7]
+	mi := &file_api_muc_muc_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -530,7 +623,7 @@ func (x *LoginRequest) String() string {
 func (*LoginRequest) ProtoMessage() {}
 
 func (x *LoginRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[7]
+	mi := &file_api_muc_muc_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -543,7 +636,7 @@ func (x *LoginRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginRequest.ProtoReflect.Descriptor instead.
 func (*LoginRequest) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{7}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *LoginRequest) GetUsername() string {
@@ -589,7 +682,7 @@ type LoginResponse struct {
 
 func (x *LoginResponse) Reset() {
 	*x = LoginResponse{}
-	mi := &file_api_muc_muc_proto_msgTypes[8]
+	mi := &file_api_muc_muc_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -601,7 +694,7 @@ func (x *LoginResponse) String() string {
 func (*LoginResponse) ProtoMessage() {}
 
 func (x *LoginResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_muc_muc_proto_msgTypes[8]
+	mi := &file_api_muc_muc_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -614,7 +707,7 @@ func (x *LoginResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginResponse.ProtoReflect.Descriptor instead.
 func (*LoginResponse) Descriptor() ([]byte, []int) {
-	return file_api_muc_muc_proto_rawDescGZIP(), []int{8}
+	return file_api_muc_muc_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *LoginResponse) GetBase() *common.BaseResponse {
@@ -663,24 +756,36 @@ var File_api_muc_muc_proto protoreflect.FileDescriptor
 
 const file_api_muc_muc_proto_rawDesc = "" +
 	"\n" +
-	"\x11api/muc/muc.proto\x12\x03muc\x1a\x17api/common/common.proto\"\xdf\x01\n" +
+	"\x11api/muc/muc.proto\x12\fcom.bdsw.muc\x1a\x17api/common/common.proto\"\xf3\x01\n" +
+	"\n" +
+	"DeviceInfo\x12\x1b\n" +
+	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12\x1f\n" +
+	"\vdevice_type\x18\x02 \x01(\tR\n" +
+	"deviceType\x12!\n" +
+	"\fdevice_brand\x18\x03 \x01(\tR\vdeviceBrand\x12!\n" +
+	"\fdevice_model\x18\x04 \x01(\tR\vdeviceModel\x12\x1d\n" +
+	"\n" +
+	"os_version\x18\x05 \x01(\tR\tosVersion\x12\x1f\n" +
+	"\vapp_version\x18\x06 \x01(\tR\n" +
+	"appVersion\x12!\n" +
+	"\fnetwork_type\x18\a \x01(\tR\vnetworkType\"\xe5\x01\n" +
 	"\x14TokenValidateRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05token\x18\x02 \x01(\tR\x05token\x12\x1b\n" +
 	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\x12%\n" +
 	"\x0eclient_version\x18\x04 \x01(\tR\rclientVersion\x12\x1f\n" +
 	"\vclient_type\x18\x05 \x01(\tR\n" +
-	"clientType\x123\n" +
-	"\vdevice_info\x18\x06 \x01(\v2\x12.common.DeviceInfoR\n" +
-	"deviceInfo\"\xee\x02\n" +
-	"\x15TokenValidateResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12\x14\n" +
+	"clientType\x129\n" +
+	"\vdevice_info\x18\x06 \x01(\v2\x18.com.bdsw.muc.DeviceInfoR\n" +
+	"deviceInfo\"\x80\x03\n" +
+	"\x15TokenValidateResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12\x14\n" +
 	"\x05valid\x18\x02 \x01(\bR\x05valid\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x1f\n" +
 	"\vexpire_time\x18\x05 \x01(\x03R\n" +
-	"expireTime\x12E\n" +
-	"\tuser_info\x18\x06 \x03(\v2(.muc.TokenValidateResponse.UserInfoEntryR\buserInfo\x12\x1d\n" +
+	"expireTime\x12N\n" +
+	"\tuser_info\x18\x06 \x03(\v21.com.bdsw.muc.TokenValidateResponse.UserInfoEntryR\buserInfo\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\a \x01(\tR\tsessionId\x12 \n" +
 	"\vpermissions\x18\b \x03(\tR\vpermissions\x1a;\n" +
@@ -690,40 +795,48 @@ const file_api_muc_muc_proto_rawDesc = "" +
 	"\x13RefreshTokenRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1b\n" +
-	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\"\xa3\x01\n" +
-	"\x14RefreshTokenResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12\x1b\n" +
+	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\"\xac\x01\n" +
+	"\x14RefreshTokenResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12\x1b\n" +
 	"\tnew_token\x18\x02 \x01(\tR\bnewToken\x12#\n" +
 	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\x12\x1f\n" +
 	"\vexpire_time\x18\x04 \x01(\x03R\n" +
 	"expireTime\"4\n" +
 	"\x19GetUserPermissionsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x81\x02\n" +
-	"\x1aGetUserPermissionsResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12 \n" +
-	"\vpermissions\x18\x02 \x03(\tR\vpermissions\x12V\n" +
-	"\rfeature_flags\x18\x03 \x03(\v21.muc.GetUserPermissionsResponse.FeatureFlagsEntryR\ffeatureFlags\x1a?\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x93\x02\n" +
+	"\x1aGetUserPermissionsResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12 \n" +
+	"\vpermissions\x18\x02 \x03(\tR\vpermissions\x12_\n" +
+	"\rfeature_flags\x18\x03 \x03(\v2:.com.bdsw.muc.GetUserPermissionsResponse.FeatureFlagsEntryR\ffeatureFlags\x1a?\n" +
 	"\x11FeatureFlagsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\"]\n" +
 	"\rLogoutRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"\x98\x01\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\xa1\x01\n" +
 	"\fLoginRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1b\n" +
-	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\x123\n" +
-	"\vdevice_info\x18\x04 \x01(\v2\x12.common.DeviceInfoR\n" +
-	"deviceInfo\"\xdd\x01\n" +
-	"\rLoginResponse\x12(\n" +
-	"\x04base\x18\x01 \x01(\v2\x14.common.BaseResponseR\x04base\x12\x17\n" +
+	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\x12<\n" +
+	"\vdevice_info\x18\x04 \x01(\v2\x1b.com.bdsw.common.DeviceInfoR\n" +
+	"deviceInfo\"\xef\x01\n" +
+	"\rLoginResponse\x121\n" +
+	"\x04base\x18\x01 \x01(\v2\x1d.com.bdsw.common.BaseResponseR\x04base\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05token\x18\x03 \x01(\tR\x05token\x12#\n" +
 	"\rrefresh_token\x18\x04 \x01(\tR\frefreshToken\x12\x1f\n" +
 	"\vexpire_time\x18\x05 \x01(\x03R\n" +
-	"expireTime\x12-\n" +
-	"\tuser_info\x18\x06 \x01(\v2\x10.common.UserInfoR\buserInfoB\x14Z\x12bdsw-im-ws/api/mucb\x06proto3"
+	"expireTime\x126\n" +
+	"\tuser_info\x18\x06 \x01(\v2\x19.com.bdsw.common.UserInfoR\buserInfo2\xb8\x03\n" +
+	"\n" +
+	"MUCService\x12Z\n" +
+	"\rValidateToken\x12\".com.bdsw.muc.TokenValidateRequest\x1a#.com.bdsw.muc.TokenValidateResponse\"\x00\x12W\n" +
+	"\fRefreshToken\x12!.com.bdsw.muc.RefreshTokenRequest\x1a\".com.bdsw.muc.RefreshTokenResponse\"\x00\x12i\n" +
+	"\x12GetUserPermissions\x12'.com.bdsw.muc.GetUserPermissionsRequest\x1a(.com.bdsw.muc.GetUserPermissionsResponse\"\x00\x12B\n" +
+	"\x05Login\x12\x1a.com.bdsw.muc.LoginRequest\x1a\x1b.com.bdsw.muc.LoginResponse\"\x00\x12F\n" +
+	"\x06Logout\x12\x1b.com.bdsw.muc.LogoutRequest\x1a\x1d.com.bdsw.common.BaseResponse\"\x00BB\n" +
+	"\fcom.bdsw.mucB\bMucProtoP\x01Z&github.com/bdsw/bdsw-im-ws/api/muc;mucb\x06proto3"
 
 var (
 	file_api_muc_muc_proto_rawDescOnce sync.Once
@@ -737,35 +850,46 @@ func file_api_muc_muc_proto_rawDescGZIP() []byte {
 	return file_api_muc_muc_proto_rawDescData
 }
 
-var file_api_muc_muc_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_api_muc_muc_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_api_muc_muc_proto_goTypes = []any{
-	(*TokenValidateRequest)(nil),       // 0: muc.TokenValidateRequest
-	(*TokenValidateResponse)(nil),      // 1: muc.TokenValidateResponse
-	(*RefreshTokenRequest)(nil),        // 2: muc.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),       // 3: muc.RefreshTokenResponse
-	(*GetUserPermissionsRequest)(nil),  // 4: muc.GetUserPermissionsRequest
-	(*GetUserPermissionsResponse)(nil), // 5: muc.GetUserPermissionsResponse
-	(*LogoutRequest)(nil),              // 6: muc.LogoutRequest
-	(*LoginRequest)(nil),               // 7: muc.LoginRequest
-	(*LoginResponse)(nil),              // 8: muc.LoginResponse
-	nil,                                // 9: muc.TokenValidateResponse.UserInfoEntry
-	nil,                                // 10: muc.GetUserPermissionsResponse.FeatureFlagsEntry
-	(*common.DeviceInfo)(nil),          // 11: common.DeviceInfo
-	(*common.BaseResponse)(nil),        // 12: common.BaseResponse
-	(*common.UserInfo)(nil),            // 13: common.UserInfo
+	(*DeviceInfo)(nil),                 // 0: com.bdsw.muc.DeviceInfo
+	(*TokenValidateRequest)(nil),       // 1: com.bdsw.muc.TokenValidateRequest
+	(*TokenValidateResponse)(nil),      // 2: com.bdsw.muc.TokenValidateResponse
+	(*RefreshTokenRequest)(nil),        // 3: com.bdsw.muc.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),       // 4: com.bdsw.muc.RefreshTokenResponse
+	(*GetUserPermissionsRequest)(nil),  // 5: com.bdsw.muc.GetUserPermissionsRequest
+	(*GetUserPermissionsResponse)(nil), // 6: com.bdsw.muc.GetUserPermissionsResponse
+	(*LogoutRequest)(nil),              // 7: com.bdsw.muc.LogoutRequest
+	(*LoginRequest)(nil),               // 8: com.bdsw.muc.LoginRequest
+	(*LoginResponse)(nil),              // 9: com.bdsw.muc.LoginResponse
+	nil,                                // 10: com.bdsw.muc.TokenValidateResponse.UserInfoEntry
+	nil,                                // 11: com.bdsw.muc.GetUserPermissionsResponse.FeatureFlagsEntry
+	(*common.BaseResponse)(nil),        // 12: com.bdsw.common.BaseResponse
+	(*common.DeviceInfo)(nil),          // 13: com.bdsw.common.DeviceInfo
+	(*common.UserInfo)(nil),            // 14: com.bdsw.common.UserInfo
 }
 var file_api_muc_muc_proto_depIdxs = []int32{
-	11, // 0: muc.TokenValidateRequest.device_info:type_name -> common.DeviceInfo
-	12, // 1: muc.TokenValidateResponse.base:type_name -> common.BaseResponse
-	9,  // 2: muc.TokenValidateResponse.user_info:type_name -> muc.TokenValidateResponse.UserInfoEntry
-	12, // 3: muc.RefreshTokenResponse.base:type_name -> common.BaseResponse
-	12, // 4: muc.GetUserPermissionsResponse.base:type_name -> common.BaseResponse
-	10, // 5: muc.GetUserPermissionsResponse.feature_flags:type_name -> muc.GetUserPermissionsResponse.FeatureFlagsEntry
-	11, // 6: muc.LoginRequest.device_info:type_name -> common.DeviceInfo
-	12, // 7: muc.LoginResponse.base:type_name -> common.BaseResponse
-	13, // 8: muc.LoginResponse.user_info:type_name -> common.UserInfo
-	9,  // [9:9] is the sub-list for method output_type
-	9,  // [9:9] is the sub-list for method input_type
+	0,  // 0: com.bdsw.muc.TokenValidateRequest.device_info:type_name -> com.bdsw.muc.DeviceInfo
+	12, // 1: com.bdsw.muc.TokenValidateResponse.base:type_name -> com.bdsw.common.BaseResponse
+	10, // 2: com.bdsw.muc.TokenValidateResponse.user_info:type_name -> com.bdsw.muc.TokenValidateResponse.UserInfoEntry
+	12, // 3: com.bdsw.muc.RefreshTokenResponse.base:type_name -> com.bdsw.common.BaseResponse
+	12, // 4: com.bdsw.muc.GetUserPermissionsResponse.base:type_name -> com.bdsw.common.BaseResponse
+	11, // 5: com.bdsw.muc.GetUserPermissionsResponse.feature_flags:type_name -> com.bdsw.muc.GetUserPermissionsResponse.FeatureFlagsEntry
+	13, // 6: com.bdsw.muc.LoginRequest.device_info:type_name -> com.bdsw.common.DeviceInfo
+	12, // 7: com.bdsw.muc.LoginResponse.base:type_name -> com.bdsw.common.BaseResponse
+	14, // 8: com.bdsw.muc.LoginResponse.user_info:type_name -> com.bdsw.common.UserInfo
+	1,  // 9: com.bdsw.muc.MUCService.ValidateToken:input_type -> com.bdsw.muc.TokenValidateRequest
+	3,  // 10: com.bdsw.muc.MUCService.RefreshToken:input_type -> com.bdsw.muc.RefreshTokenRequest
+	5,  // 11: com.bdsw.muc.MUCService.GetUserPermissions:input_type -> com.bdsw.muc.GetUserPermissionsRequest
+	8,  // 12: com.bdsw.muc.MUCService.Login:input_type -> com.bdsw.muc.LoginRequest
+	7,  // 13: com.bdsw.muc.MUCService.Logout:input_type -> com.bdsw.muc.LogoutRequest
+	2,  // 14: com.bdsw.muc.MUCService.ValidateToken:output_type -> com.bdsw.muc.TokenValidateResponse
+	4,  // 15: com.bdsw.muc.MUCService.RefreshToken:output_type -> com.bdsw.muc.RefreshTokenResponse
+	6,  // 16: com.bdsw.muc.MUCService.GetUserPermissions:output_type -> com.bdsw.muc.GetUserPermissionsResponse
+	9,  // 17: com.bdsw.muc.MUCService.Login:output_type -> com.bdsw.muc.LoginResponse
+	12, // 18: com.bdsw.muc.MUCService.Logout:output_type -> com.bdsw.common.BaseResponse
+	14, // [14:19] is the sub-list for method output_type
+	9,  // [9:14] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -782,9 +906,9 @@ func file_api_muc_muc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_muc_muc_proto_rawDesc), len(file_api_muc_muc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_api_muc_muc_proto_goTypes,
 		DependencyIndexes: file_api_muc_muc_proto_depIdxs,

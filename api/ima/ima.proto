@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.ima;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/api/ima;ima";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.ima';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 ImaProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "ImaProto";
+
+import "api/common/common.proto";
+
+// 推送请求
+message PushRequest {
+  string user_id = 1;
+  string device_id = 2;
+  common.ServerMessage message = 3;
+}
+
+// 批量推送
+message BatchPushRequest {
+  repeated PushRequest pushes = 1;
+}
+
+// 广播消息
+message BroadcastMessage {
+  common.ServerMessage message = 1;
+  repeated string target_users = 2;  // 空表示广播给所有人
+}
+
+// 踢用户下线请求
+message KickUserRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string reason = 3;  // multi_login, admin_kick, system_maintenance
+  string operator = 4;
+}
+
+service ImaService {
+  // 单用户推送
+  rpc PushToUser(PushRequest) returns (common.BaseResponse) {}
+  // 批量推送
+  rpc PushToUsers(BatchPushRequest) returns (common.BaseResponse) {}
+  // 广播
+  rpc Broadcast(BroadcastMessage) returns (common.BaseResponse) {}
+  // 踢用户下线
+  rpc KickUser(KickUserRequest) returns (common.BaseResponse) {}
+}

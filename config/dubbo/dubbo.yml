@@ -7,7 +7,7 @@ dubbo:
     version: "1.0.0"
 #    environment: "dev"
 #    # 添加元数据类型配置
-    metadata-type: remote
+#    metadata-type: remote
 
   registries:
     nacos:
@@ -25,13 +25,13 @@ dubbo:
       port: 20000
       serialization: protobuf  # 使用 protobuf 序列化
 
-  metadata-report:
-    protocol: nacos
-    address: 127.0.0.1:8848
-    username: nacos
-    password: nacos
-    group: dubbo  # 注意：这里group应该设置为dubbo，与Java服务一致
-    namespace: public
+#  metadata-report:
+#    protocol: nacos
+#    address: 127.0.0.1:8848
+#    username: nacos
+#    password: nacos
+#    group: dubbo  # 注意：这里group应该设置为dubbo，与Java服务一致
+#    namespace: public
 
   provider:
     services:
@@ -65,7 +65,7 @@ dubbo:
 #    references:
 #      BusinessMessageService:
 #        protocol: tri
-#        interface: "bdsw-im-ws/api/business_message.BusinessMessageService"  # MSG 服务接口
+#        interface: "bdsw-im-ws/api/msg.BusinessMessageService"  # MSG 服务接口
 #        # 添加 provided-by 配置
 #        provided-by: "bdsw-im-ws"
 #        version: "1.0.0"

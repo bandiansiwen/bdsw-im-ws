@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bdsw-im-ws/internal/redis"
-	"bdsw-im-ws/internal/registry"
 	"context"
 	"log"
 	"net/http"
@@ -13,7 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"bdsw-im-ws/internal/config"
+	"github.com/bdsw/bdsw-im-ws/internal/redis"
+	"github.com/bdsw/bdsw-im-ws/internal/registry"
+
+	"github.com/bdsw/bdsw-im-ws/internal/config"
 )
 
 func setupSystemOptimization() {

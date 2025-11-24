@@ -1,10 +1,31 @@
 syntax = "proto3";
 
-package muc;
+package com.bdsw.muc;
 
-option go_package = "bdsw-im-ws/api/muc";
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/api/muc;muc";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.muc';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MucProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MucProto";
 
 import "api/common/common.proto";
+
+// 设备信息
+message DeviceInfo {
+  string device_id = 1;
+  string device_type = 2;  // web, android, ios, windows, mac
+  string device_brand = 3;
+  string device_model = 4;
+  string os_version = 5;
+  string app_version = 6;
+  string network_type = 7;
+}
 
 // Token 验证请求
 message TokenValidateRequest {
@@ -13,7 +34,7 @@ message TokenValidateRequest {
   string device_id = 3;
   string client_version = 4;
   string client_type = 5;
-  common.DeviceInfo device_info = 6;
+  DeviceInfo device_info = 6;
 }
 
 // Token 验证响应
@@ -78,4 +99,17 @@ message LoginResponse {
   string refresh_token = 4;
   int64 expire_time = 5;
   common.UserInfo user_info = 6;
+}
+
+service MUCService {
+  // Token 验证
+  rpc ValidateToken(TokenValidateRequest) returns (TokenValidateResponse){}
+  // 刷新 Token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse){}
+  // 获取用户权限
+  rpc GetUserPermissions(GetUserPermissionsRequest) returns (GetUserPermissionsResponse){}
+  // 用户登录
+  rpc Login(LoginRequest) returns (LoginResponse){}
+  // 用户登出
+  rpc Logout(LogoutRequest) returns (common.BaseResponse){}
 }

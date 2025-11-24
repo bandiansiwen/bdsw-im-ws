@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.msg;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/api/msg;msg";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.msg';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MsgProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MsgProto";
+
+import "api/common/common.proto";
+
+// 处理批量消息请求
+message HandleBatchMessagesRequest {
+  repeated common.ClientMessage messages = 1;
+}
+
+// 处理批量消息响应
+message HandleBatchMessagesResponse {
+  common.BaseResponse base = 1;
+  repeated common.ServerMessage responses = 2;
+  int32 success_count = 3;
+  int32 fail_count = 4;
+}
+
+// 会话信息
+message SessionInfo {
+  string session_id = 1;
+  string session_type = 2;  // single, group, system
+  string target_id = 3;
+  string last_message = 4;
+  int64 last_message_time = 5;
+  int32 unread_count = 6;
+  bool is_top = 7;
+  bool mute = 8;
+}
+
+// 获取用户会话列表请求
+message GetUserSessionsRequest {
+  string user_id = 1;
+  common.PageRequest page = 2;
+}
+
+// 获取用户会话列表响应
+message GetUserSessionsResponse {
+  common.BaseResponse base = 1;
+  repeated SessionInfo sessions = 2;
+  common.PageResponse page = 3;
+}
+
+// 获取聊天历史请求
+message GetChatHistoryRequest {
+  string session_id = 1;
+  string user_id = 2;
+  int64 start_time = 3;
+  int64 end_time = 4;
+  common.PageRequest page = 5;
+}
+
+// 获取聊天历史响应
+message GetChatHistoryResponse {
+  common.BaseResponse base = 1;
+  repeated common.ServerMessage messages = 2;
+  common.PageResponse page = 3;
+}
+
+// 消息已读确认请求
+message MessageReadRequest {
+  string user_id = 1;
+  string session_id = 2;
+  string message_id = 3;  // 为空表示已读该会话所有消息
+  int64 read_time = 4;
+}
+
+// 撤回消息请求
+message RecallMessageRequest {
+  string user_id = 1;
+  string message_id = 2;
+  string reason = 3;
+}
+
+// 踢用户下线请求
+message KickUserRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string reason = 3;  // multi_login, admin_kick, system_maintenance
+  string operator = 4;
+}
+
+// ================================
+// 业务消息服务接口
+// ================================
+
+service MsgService {
+  // 处理客户端消息
+  rpc HandleClientMessage(common.ClientMessage) returns (common.ServerMessage){}
+  // 处理批量消息
+  rpc HandleBatchMessages(HandleBatchMessagesRequest) returns (HandleBatchMessagesResponse){}
+  // 获取用户会话列表
+  rpc GetUserSessions(GetUserSessionsRequest) returns (GetUserSessionsResponse){}
+  // 获取聊天历史
+  rpc GetChatHistory(GetChatHistoryRequest) returns (GetChatHistoryResponse){}
+  // 消息已读确认
+  rpc MarkMessageRead(MessageReadRequest) returns (common.BaseResponse){}
+  // 撤回消息
+  rpc  RecallMessage(RecallMessageRequest) returns (common.BaseResponse){}
+  // 踢用户下线
+  rpc KickUser(KickUserRequest) returns (common.BaseResponse){}
+}

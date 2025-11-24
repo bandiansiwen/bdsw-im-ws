@@ -1,8 +1,19 @@
 syntax = "proto3";
 
-package common;
+// Java 包的命名空间
+package com.bdsw.common;
 
-option go_package = "bdsw-im-ws/api/common";
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/api/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 CommonProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "CommonProto";
 
 // 基础响应消息
 message BaseResponse {

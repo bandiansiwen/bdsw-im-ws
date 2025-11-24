@@ -8,7 +8,7 @@ import (
 
 func GenerateInstanceID() string {
 	hostname, _ := os.Hostname()
-	return fmt.Sprintf("ima-gateway-%s-%d", hostname, time.Now().Unix())
+	return fmt.Sprintf("ima-%s-%d", hostname, time.Now().Unix())
 }
 
 func GenerateMessageID() string {
