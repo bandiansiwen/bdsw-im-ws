@@ -4,7 +4,7 @@ dubbo:
     name: "bdsw-im-ws"
 #    organization: "dubbo-go"
 #    module: "bdsw-im-ws"
-    version: "1.0.0"
+#    version: "1.0.0"
 #    environment: "dev"
 #    # 添加元数据类型配置
 #    metadata-type: remote
@@ -37,8 +37,8 @@ dubbo:
     services:
       IMAGatewayService:
         interface: "IMAGatewayService"  # 服务接口名
-        version: "1.0.0"
-        group: "dev"
+#        version: "1.0.0"
+#        group: "dev"
         protocol: tri
         serialization: protobuf
         cluster: "failover"
@@ -55,46 +55,47 @@ dubbo:
           - name: "KickUser"
             retries: 1
 
-#  consumer:
-#    check: false
-#    request_timeout: "10s"
-#    connect_timeout: "5s"
-#    client_number: 10
-#    pool_size: 200
-#    pool_ttl: 600
-#    references:
-#      BusinessMessageService:
-#        protocol: tri
-#        interface: "bdsw-im-ws/api/msg.BusinessMessageService"  # MSG 服务接口
-#        # 添加 provided-by 配置
-#        provided-by: "bdsw-im-ws"
+  consumer:
+    check: false
+    request_timeout: "10s"
+    connect_timeout: "5s"
+    client_number: 10
+    pool_size: 200
+    pool_ttl: 600
+    references:
+      MsgService:
+        protocol: tri
+        interface: "com.bdsw.msg.MsgService"  # MSG 服务接口
+        # 添加 provided-by 配置
+        provided-by: "msg-service"
 #        version: "1.0.0"
 #        group: "dev"
-#        cluster: "failover"
-#        loadbalance: "random"
-#        serialization: "protobuf"
-#        timeout: "10s"
-#        retries: 3
+        cluster: "failover"
+        loadbalance: "random"
+        serialization: "protobuf"
+        timeout: "5s"
+        retries: 3
 #        methods:
 #          - name: "HandleClientMessage"
 #            retries: 2
-#
-#      MUCService:
-#        protocol: tri
-#        interface: "bdsw-im-ws/api/muc.MUCService"              # MUC 服务接口
-#        # 添加 provided-by 配置
-#        provided-by: "bdsw-im-ws"
+
+      MUCService:
+        protocol: tri
+#        interface: "com.bdsw.muc.MUCService"              # MUC 服务接口
+        interface: "muc-service"
+        # 添加 provided-by 配置
+        provided-by: "muc-service"
 #        version: "1.0.0"
 #        group: "dev"
-#        cluster: "failover"
-#        loadbalance: "random"
-#        serialization: "protobuf"
-#        timeout: "5s"
-#        retries: 2
+        cluster: "failover"
+        loadbalance: "random"
+        serialization: "protobuf"
+        timeout: "5s"
+        retries: 3
 #        methods:
 #          - name: "ValidateToken"
 #            retries: 1
-#          - name: "KickUser"
+#          - name: "RefreshToken"
 #            retries: 1
 
   logger:
@@ -104,8 +105,8 @@ dubbo:
       encoding: "console"
       output-paths:
         - "stdout"
-        - "./logs/ima-gateway.log"
+        - "./logs/ima.log"
       error-output-paths:
         - "stderr"
       initial-fields:
-        service: "ima-gateway"
+        service: "ima"

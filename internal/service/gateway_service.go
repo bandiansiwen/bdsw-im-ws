@@ -189,9 +189,9 @@ func (s *GatewayService) validateToken(userID, token, deviceID string) (*muc.Tok
 		Token:    token,
 		DeviceId: deviceID,
 	})
-	if err.GetError() != nil {
+	if err != nil {
 		log.Printf("Token validation RPC error for user %s: %v", userID, err)
-		return nil, &err
+		return nil, err
 	}
 
 	// 3. 缓存验证结果
@@ -295,7 +295,7 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 		context.Background(),
 		&clientMsg,
 	)
-	if err.GetError() != nil {
+	if err != nil {
 		log.Printf("Failed to process message for user %s: %v", userID, err)
 		s.sendErrorToUser(userID, deviceID, "Service temporarily unavailable")
 		return

@@ -3,15 +3,14 @@ package consumer
 import (
 	"log"
 
+	"dubbo.apache.org/dubbo-go/v3/config"
 	"github.com/bdsw/bdsw-im-ws/api/msg"
 	"github.com/bdsw/bdsw-im-ws/api/muc"
-
-	"dubbo.apache.org/dubbo-go/v3/config"
 )
 
 type IMAServiceConsumer struct {
-	MsgService msg.MsgServiceClient
-	MUCService muc.MUCServiceClient
+	MsgService msg.MsgServiceClientImpl
+	MUCService muc.MUCServiceClientImpl
 }
 
 func NewIMAServiceConsumer() (*IMAServiceConsumer, error) {
