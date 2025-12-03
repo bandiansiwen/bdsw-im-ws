@@ -86,3 +86,4 @@ docker-compose.override.yml
 
 *.log
 /bin/*
+/dubbo.metadata.bdsw-im-ws
