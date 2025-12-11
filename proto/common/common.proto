@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 CommonProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "CommonProto";
+
+// 基础响应消息
+message Response {
+  int32 code = 1;
+  string message = 2;
+  bytes data = 3;
+  int64 timestamp = 4;
+}
+
+// 分页请求
+message PageRequest {
+  int32 page = 1;
+  int32 size = 2;
+  string cursor = 3; // 游标，用于更高效的分页
+}
+
+// 分页响应
+message PageResponse {
+  repeated bytes items = 1;
+  bool has_next = 2;
+  string next_cursor = 3;
+  int32 total = 4;
+}
+
+// 设备信息
+message DeviceInfo {
+  string device_id = 1;
+  string device_type = 2;  // web, android, ios, windows, mac
+  string device_name = 3;
+  string system_version = 4;
+  string app_version = 5;
+  string push_token = 6; // 推送令牌
+  int64 last_active = 7;
+}
+
+// 位置信息（用于发送位置）
+message Location {
+  double latitude = 1;
+  double longitude = 2;
+  string address = 3;
+  string poi_name = 4; // 兴趣点名称
+}

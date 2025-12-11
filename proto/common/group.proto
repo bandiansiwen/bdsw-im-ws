@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 GroupProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "GroupProto";
+
+// 群组
+message Group {
+  string group_id = 1;
+  string name = 2;
+  string avatar_url = 3;
+  string owner_id = 4;
+  string description = 5;
+  int32 capacity = 6;                      // 群容量
+  int32 member_count = 7;
+  string announcement = 8;                 // 群公告
+  int64 announcement_time = 9;             // 公告发布时间
+
+  // 群设置
+  bool is_public = 10;                     // 是否公开群
+  bool join_approval = 11;                 // 加群是否需要审批
+  bool member_invite = 12;                 // 是否允许成员邀请
+  bool member_modify_nickname = 13;        // 是否允许成员修改群昵称
+  int32 mute_all = 14;                     // 全员禁言: 0:不禁言 1:禁言普通成员 2:禁言所有成员
+  bool allow_anonymous = 15;               // 是否允许匿名
+
+  int64 create_time = 16;
+  int64 update_time = 17;
+
+  // 扩展字段
+  map<string, string> extras = 18;
+}
+
+// 群成员
+message GroupMember {
+  string group_id = 1;
+  string user_id = 2;
+
+  // 成员角色
+  enum MemberRole {
+    OWNER = 0;      // 群主
+    ADMIN = 1;      // 管理员
+    MEMBER = 2;     // 普通成员
+    GUEST = 3;      // 游客
+  }
+  MemberRole role = 3;
+
+  string alias = 4;                        // 群昵称
+  string join_reason = 5;                  // 加群理由
+  int64 join_time = 6;
+
+  // 成员状态
+  bool is_muted = 7;                       // 是否被禁言
+  int64 mute_end_time = 8;                 // 禁言结束时间
+
+  // 扩展字段
+  map<string, string> extras = 9;
+}
+
+// 群申请
+message GroupApply {
+  string apply_id = 1;
+  string group_id = 2;
+  string user_id = 3;
+  string apply_reason = 4;
+  int32 status = 5;                        // 0:待处理 1:同意 2:拒绝 3:忽略
+  string handle_user_id = 6;               // 处理人
+  string handle_reason = 7;
+  int64 apply_time = 8;
+  int64 handle_time = 9;
+}

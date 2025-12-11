@@ -1,0 +1,144 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/message.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MessageServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MessageServiceProto";
+
+// 消息服务
+service MessageService {
+  // 发送消息
+  rpc sendMessage (SendMessageRequest) returns (SendMessageResponse);
+
+  // 消息投递到MQ
+  rpc deliverMessage (DeliverMessageRequest) returns (common.Response);
+
+  // 撤回消息
+  rpc recallMessage (RecallMessageRequest) returns (common.Response);
+
+  // 删除消息
+  rpc deleteMessage (DeleteMessageRequest) returns (common.Response);
+
+  // 标记消息已读
+  rpc markMessageRead (MarkReadRequest) returns (common.Response);
+
+  // 获取单条消息
+  rpc getMessage (GetMessageRequest) returns (common.Message);
+
+  // 获取历史消息
+  rpc getHistoryMessages (HistoryRequest) returns (HistoryResponse);
+
+  // 搜索消息
+  rpc searchMessages (SearchRequest) returns (SearchResponse);
+
+  // 获取会话列表
+  rpc getConversations (ConversationRequest) returns (ConversationResponse);
+
+  // 清空会话消息
+  rpc clearConversation (ClearConversationRequest) returns (common.Response);
+}
+
+message SendMessageRequest {
+  common.Message message = 1;
+  bool need_receipt = 2; // 是否需要送达回执
+  bool need_read_receipt = 3; // 是否需要已读回执
+  bool store_only = 4; // 是否只存储不推送（用于漫游消息同步）
+}
+
+message SendMessageResponse {
+  string msg_id = 1;
+  int64 seq = 2;
+  int64 conv_seq = 3;
+  int64 server_time = 4;
+  repeated string offline_user_ids = 5; // 离线的用户ID列表
+}
+
+message DeliverMessageRequest {
+  common.Message message = 1;
+  repeated string user_ids = 2; // 需要投递的用户ID列表
+  bool need_push = 3; // 是否需要推送
+  int32 push_strategy = 4; // 推送策略: 0:实时 1:定时 2:合并
+}
+
+message RecallMessageRequest {
+  string msg_id = 1;
+  string operator_id = 2;
+  string reason = 3;
+}
+
+message DeleteMessageRequest {
+  string user_id = 1;
+  repeated string msg_ids = 2;
+  bool delete_for_all = 3; // 是否所有人删除（仅群主/管理员）
+}
+
+message MarkReadRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+  int64 read_seq = 3;
+  bool sync_to_other_devices = 4; // 是否同步到其他设备
+}
+
+message GetMessageRequest {
+  string msg_id = 1;
+}
+
+message HistoryRequest {
+  string conversation_id = 1;
+  int64 start_seq = 2; // 起始序列号（不包含）
+  int64 end_seq = 3; // 结束序列号（包含）
+  int32 limit = 4;
+  bool reverse = 5; // 是否反向查询（用于下拉加载更多）
+}
+
+message HistoryResponse {
+  repeated common.Message messages = 1;
+  bool has_more = 2;
+  int64 min_seq = 3;
+  int64 max_seq = 4;
+}
+
+message SearchRequest {
+  string user_id = 1;
+  string keyword = 2;
+  string conversation_id = 3; // 可选，指定会话搜索
+  int64 start_time = 4;
+  int64 end_time = 5;
+  repeated common.MessageType message_types = 6;
+  common.PageRequest page = 7;
+}
+
+message SearchResponse {
+  repeated common.Message messages = 1;
+  common.PageResponse page = 2;
+  int32 total = 3;
+}
+
+message ConversationRequest {
+  string user_id = 1;
+  int64 update_time = 2; // 客户端最后更新时间，用于增量同步
+}
+
+message ConversationResponse {
+  repeated common.Conversation conversations = 1;
+  int64 server_time = 2;
+  bool full_sync = 3; // 是否全量同步
+}
+
+message ClearConversationRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+  bool clear_history = 3; // 是否清除历史消息
+}

@@ -1,0 +1,230 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MessageProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MessageProto";
+
+// 消息类型枚举
+enum MessageType {
+  UNKNOWN = 0;
+  TEXT = 1;           // 文本
+  IMAGE = 2;          // 图片
+  VOICE = 3;          // 语音
+  VIDEO = 4;          // 视频
+  FILE = 5;           // 文件
+  LOCATION = 6;       // 位置
+  CARD = 7;           // 名片
+  EMOJI = 8;          // 表情包
+  FORWARD = 9;        // 转发消息
+  SYSTEM = 10;        // 系统消息
+  TIP = 11;           // 提示消息
+  RICH_TEXT = 12;     // 富文本
+  MARKDOWN = 13;      // Markdown
+  CUSTOM = 100;       // 自定义消息
+}
+
+// 会话类型
+enum ConversationType {
+  SINGLE = 0;         // 单聊
+  GROUP = 1;          // 群聊
+  SYSTEM_CHAT = 2;     // 系统会话
+  CUSTOMER_SERVICE = 3; // 客服
+}
+
+// 消息内容基类
+message MessageContent {
+  oneof content {
+    TextContent text = 1;
+    ImageContent image = 2;
+    VoiceContent voice = 3;
+    VideoContent video = 4;
+    FileContent file = 5;
+    LocationContent location = 6;
+    CardContent card = 7;
+    EmojiContent emoji = 8;
+    ForwardContent forward = 9;
+    RichTextContent rich_text = 10;
+    CustomContent custom = 11;
+  }
+}
+
+// 具体内容类型
+message TextContent {
+  string text = 1;
+  repeated Mention mentions = 2; // @提及
+}
+
+message ImageContent {
+  string image_id = 1;
+  string url = 2;
+  string thumbnail_url = 3;
+  int32 width = 4;
+  int32 height = 5;
+  int64 size = 6;
+  string format = 7; // jpg, png, gif等
+}
+
+message VoiceContent {
+  string voice_id = 1;
+  string url = 2;
+  int32 duration = 3; // 时长（秒）
+  int64 size = 4;
+}
+
+message VideoContent {
+  string video_id = 1;
+  string url = 2;
+  string thumbnail_url = 3;
+  int32 duration = 4; // 时长（秒）
+  int32 width = 5;
+  int32 height = 6;
+  int64 size = 7;
+  string format = 8;
+}
+
+message FileContent {
+  string file_id = 1;
+  string file_name = 2;
+  string url = 3;
+  int64 size = 4;
+  string extension = 5;
+}
+
+message LocationContent {
+  Location location = 1;
+  string title = 2;
+}
+
+message CardContent {
+  string user_id = 1;
+  string nickname = 2;
+  string avatar_url = 3;
+}
+
+message EmojiContent {
+  string emoji_id = 1;
+  string url = 2;
+  string name = 3;
+  bool is_animated = 4; // 是否动态表情
+}
+
+message ForwardContent {
+  repeated Message messages = 1;
+  string title = 2; // 转发标题
+}
+
+message RichTextContent {
+  string html = 1;
+  repeated string image_urls = 2;
+}
+
+message CustomContent {
+  string type = 1;
+  bytes data = 2;
+}
+
+// @提及
+message Mention {
+  string user_id = 1;
+  string name = 2;
+  int32 type = 3; // 0:所有人 1:指定用户
+}
+
+// 消息实体
+message Message {
+  string msg_id = 1;                // 全局唯一消息ID
+  string client_msg_id = 2;         // 客户端消息ID（用于去重）
+  MessageType type = 3;
+  ConversationType conversation_type = 4;
+
+  string sender_id = 5;
+  string receiver_id = 6;           // 用户ID或群ID
+
+  // 消息序列号
+  int64 seq = 7;                    // 全局序列号
+  int64 conv_seq = 8;               // 会话内序列号
+
+  MessageContent content = 9;
+
+  // 时间戳
+  int64 client_time = 10;           // 客户端发送时间
+  int64 server_time = 11;           // 服务器接收时间
+
+  // 消息状态
+  enum MessageStatus {
+    SENDING = 0;                    // 发送中（仅客户端使用）
+    SENT = 1;                       // 已发送到服务器
+    DELIVERED = 2;                  // 已送达
+    READ = 3;                       // 已读
+    FAILED = 4;                     // 发送失败
+  }
+  MessageStatus status = 12;
+
+  // 扩展属性
+  map<string, string> properties = 13;
+
+  // 已读回执相关
+  repeated string read_user_ids = 14;       // 已读用户ID列表
+  int64 first_read_time = 15;               // 首次阅读时间
+
+  // 撤回相关
+  bool is_recalled = 16;                    // 是否已撤回
+  string recall_operator = 17;              // 撤回操作人
+  int64 recall_time = 18;                   // 撤回时间
+  string recall_reason = 19;                // 撤回原因
+
+  // 回复消息
+  Message reply_to = 20;                    // 回复的消息
+
+  // 翻译相关（Hula AI功能）
+  string translated_text = 21;              // 翻译后的文本
+  string source_lang = 22;                  // 源语言
+  string target_lang = 23;                  // 目标语言
+
+  // 扩展字段
+  map<string, string> extensions = 24;
+}
+
+// 会话
+message Conversation {
+  string conversation_id = 1;
+  ConversationType type = 2;
+  string target_id = 3;                    // 对方用户ID或群ID
+  string title = 4;                        // 会话标题
+  string avatar = 5;                       // 会话头像
+
+  Message last_message = 6;                // 最后一条消息
+  int64 last_active_time = 7;              // 最后活跃时间
+
+  int32 unread_count = 8;                  // 未读消息数
+  bool is_muted = 9;                       // 是否免打扰
+  bool is_pinned = 10;                     // 是否置顶
+  int32 pinned_time = 11;                  // 置顶时间
+
+  // 消息草稿
+  string draft = 12;
+  int64 draft_time = 13;
+
+  // 扩展字段
+  map<string, string> extras = 14;
+}
+
+// 已读回执
+message ReadReceipt {
+  string user_id = 1;
+  string conversation_id = 2;
+  int64 read_seq = 3;                      // 已读到的消息序列号
+  int64 read_time = 4;
+}

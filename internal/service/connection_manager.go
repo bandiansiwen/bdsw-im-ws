@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -10,8 +12,9 @@ import (
 type UserConnection struct {
 	UserID    string
 	DeviceID  string
-	Conn      *websocket.Conn
+	WS        *websocket.Conn
 	LoginTime int64
+	Closed    bool
 }
 
 type UserConnectionManager struct {
@@ -38,7 +41,7 @@ func (m *UserConnectionManager) Register(userID, deviceID string, conn *websocke
 	userConn := &UserConnection{
 		UserID:    userID,
 		DeviceID:  deviceID,
-		Conn:      conn, // 直接存储指针
+		WS:        conn, // 直接存储指针
 		LoginTime: time.Now().Unix(),
 	}
 
@@ -66,7 +69,7 @@ func (m *UserConnectionManager) Get(userID, deviceID string) *websocket.Conn {
 
 	if devices, exists := m.users[userID]; exists {
 		if userConn, exists := devices[deviceID]; exists {
-			return userConn.Conn // 返回指针
+			return userConn.WS // 返回指针
 		}
 	}
 	return nil
@@ -133,7 +136,7 @@ func (m *UserConnectionManager) BroadcastToUser(userID string, handler func(devi
 
 	if devices, exists := m.users[userID]; exists {
 		for deviceID, userConn := range devices {
-			handler(deviceID, userConn.Conn) // 传递指针
+			handler(deviceID, userConn.WS) // 传递指针
 		}
 	}
 }
@@ -145,21 +148,56 @@ func (m *UserConnectionManager) Broadcast(handler func(userID, deviceID string, 
 
 	for userID, devices := range m.users {
 		for deviceID, userConn := range devices {
-			handler(userID, deviceID, userConn.Conn) // 传递指针
+			handler(userID, deviceID, userConn.WS) // 传递指针
 		}
 	}
 }
 
 // CloseAll 关闭所有连接
 func (m *UserConnectionManager) CloseAll() {
+
+	log.Println("WebSocket server shutdown")
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	for userID, devices := range m.users {
 		for deviceID, userConn := range devices {
-			userConn.Conn.Close()
+			userConn.WS.Close()
 			delete(devices, deviceID)
 		}
 		delete(m.users, userID)
 	}
+}
+
+// Disconnect 断开连接
+func (m *UserConnectionManager) Disconnect(userID, deviceID string, code int, reason string) error {
+	conn := m.GetConnection(userID, deviceID)
+	if conn == nil {
+		return fmt.Errorf("connection not found")
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if conn.Closed {
+		return nil
+	}
+
+	// 使用gorilla/websocket的CloseMessage发送关闭帧
+	closeMsg := websocket.FormatCloseMessage(code, reason)
+	err := conn.WS.WriteControl(websocket.CloseMessage, closeMsg, time.Now().Add(5*time.Second))
+	if err != nil {
+		return err
+	}
+
+	conn.Closed = true
+	err2 := conn.WS.Close()
+	if err2 != nil {
+		return err2
+	}
+
+	m.Unregister(userID, deviceID)
+
+	return nil
 }

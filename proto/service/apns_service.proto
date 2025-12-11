@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 ApnsServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "ApnsServiceProto";
+
+// APNS服务（对接苹果推送）
+service ApnsService {
+  // 发送APNS推送
+  rpc sendApnsPush (ApnsPushRequest) returns (ApnsPushResponse);
+
+  // 验证设备令牌
+  rpc validateDeviceToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+
+  // 获取推送统计
+  rpc getPushStatistics (StatisticsRequest) returns (StatisticsResponse);
+}
+
+message ApnsPushRequest {
+  string device_token = 1;
+  ApnsPayload payload = 2;
+  ApnsHeaders headers = 3;
+  int32 priority = 4; // 10:即时 5:可延迟
+  int64 expiration = 5; // 过期时间戳
+  string collapse_id = 6; // 分组ID
+}
+
+message ApnsPayload {
+  Aps aps = 1;
+  map<string, string> custom_data = 2;
+}
+
+message Aps {
+  Alert alert = 1;
+  int32 badge = 2;
+  string sound = 3;
+  int32 content_available = 4; // 1:后台更新
+  int32 mutable_content = 5; // 1:可修改内容
+  string category = 6;
+  string thread_id = 7;
+}
+
+message Alert {
+  string title = 1;
+  string subtitle = 2;
+  string body = 3;
+  string title_loc_key = 4;
+  repeated string title_loc_args = 5;
+  string loc_key = 6;
+  repeated string loc_args = 7;
+  string action_loc_key = 8;
+  string launch_image = 9;
+}
+
+message ApnsHeaders {
+  string apns_id = 1;
+  string apns_expiration = 2;
+  string apns_priority = 3;
+  string apns_topic = 4;
+  string apns_collapse_id = 5;
+  string apns_push_type = 6;
+}
+
+message ApnsPushResponse {
+  string apns_id = 1;
+  bool success = 2;
+  string error = 3;
+  string error_description = 4;
+  int64 timestamp = 5;
+}
+
+message ValidateTokenRequest {
+  repeated string device_tokens = 1;
+}
+
+message ValidateTokenResponse {
+  message TokenStatus {
+    string device_token = 1;
+    bool valid = 2;
+    string reason = 3;
+    int64 last_seen = 4;
+  }
+  repeated TokenStatus statuses = 1;
+}
+
+message StatisticsRequest {
+  int64 start_time = 1;
+  int64 end_time = 2;
+  string topic = 3;
+}
+
+message StatisticsResponse {
+  int64 total_sent = 1;
+  int64 total_delivered = 2;
+  int64 total_failed = 3;
+  map<string, int64> failure_reasons = 4; // 失败原因统计
+  int64 period_start = 5;
+  int64 period_end = 6;
+}

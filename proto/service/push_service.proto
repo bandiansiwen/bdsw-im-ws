@@ -1,0 +1,86 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/message.proto";
+import "proto/common/push.proto";  // 引入通用推送结构
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 PushServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "PushServiceProto";
+
+// 推送服务
+service PushService {
+  // 单用户推送
+  rpc pushToUser(PushToUserRequest) returns (common.PushResponse);
+
+  // 批量用户推送
+  rpc batchPushToUsers(BatchPushToUsersRequest) returns (common.PushResponse);
+
+  // 群组推送（如群聊消息）
+  rpc pushToGroup(PushToGroupRequest) returns (common.PushResponse);
+
+  // 获取推送结果
+  rpc getPushResult(GetPushResultRequest) returns (GetPushResultResponse);
+
+  // 取消推送（针对可撤回消息）
+  rpc cancelPush(CancelPushRequest) returns (common.Response);
+
+  // 广播消息
+  rpc PushBroadcast(common.PushBroadcastRequest) returns (common.PushResponse);
+
+}
+
+// 推送给用户请求
+message PushToUserRequest {
+  common.Message message = 1;
+  string target_user_id = 2;
+  optional string device_id = 3;  // 可选，指定设备推送
+  bool offline_push_enabled = 4;  // 是否启用离线推送
+  int32 retry_times = 5;          // 重试次数
+}
+
+// 批量推送请求
+message BatchPushToUsersRequest {
+  common.Message message = 1;
+  repeated string target_user_ids = 2;
+  bool offline_push_enabled = 3;
+}
+
+// 群组推送请求
+message PushToGroupRequest {
+  common.Message message = 1;
+  string group_id = 2;
+  repeated string exclude_user_ids = 3;  // 排除的用户
+}
+
+// 获取推送结果请求
+message GetPushResultRequest {
+  string task_id = 1;
+}
+
+// 获取推送结果响应
+message GetPushResultResponse {
+  string task_id = 1;
+  int32 total_count = 2;
+  int32 success_count = 3;
+  int32 fail_count = 4;
+  repeated string failed_user_ids = 5;
+  int64 create_time = 6;
+  int64 complete_time = 7;
+}
+
+// 取消推送请求
+message CancelPushRequest {
+  string msg_id = 1;
+  string user_id = 2;
+}

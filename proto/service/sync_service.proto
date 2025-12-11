@@ -1,0 +1,139 @@
+syntax = "proto3";
+import "proto/common/message.proto";
+import "proto/common/user.proto";
+import "proto/common/group.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 SyncServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "SyncServiceProto";
+
+// 同步服务
+service SyncService {
+  // 同步消息
+  rpc syncMessages (SyncRequest) returns (SyncResponse);
+
+  // 获取未读计数
+  rpc getUnreadCounts (UnreadRequest) returns (UnreadResponse);
+
+  // 获取会话同步信息
+  rpc syncConversations (ConversationSyncRequest) returns (ConversationSyncResponse);
+
+  // 获取消息序列号
+  rpc getMessageSeq (GetSeqRequest) returns (GetSeqResponse);
+
+  // 同步群组信息
+  rpc syncGroups (GroupSyncRequest) returns (GroupSyncResponse);
+
+  // 同步好友信息
+  rpc syncFriends (FriendSyncRequest) returns (FriendSyncResponse);
+
+  // 全量同步（新设备登录）
+  rpc fullSync (FullSyncRequest) returns (FullSyncResponse);
+}
+
+message SyncRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 last_sync_time = 3;
+  map<string, int64> conversation_seqs = 4; // 各会话最后同步的序列号
+  int32 limit = 5;
+  bool pull_offline = 6; // 是否拉取离线消息
+}
+
+message SyncResponse {
+  repeated common.Message messages = 1;
+  int64 latest_time = 2;
+  bool has_more = 3;
+  map<string, int64> latest_seqs = 4; // 各会话最新的序列号
+  int64 next_pull_interval = 5; // 下次拉取间隔（毫秒）
+}
+
+message UnreadRequest {
+  string user_id = 1;
+  repeated string conversation_ids = 2; // 为空则获取所有会话
+}
+
+message UnreadResponse {
+  map<string, int32> unread_counts = 1; // key:conversation_id, value:unread_count
+  int64 total_unread = 2;
+}
+
+message ConversationSyncRequest {
+  string user_id = 1;
+  int64 last_update_time = 2;
+}
+
+message ConversationSyncResponse {
+  repeated common.Conversation conversations = 1;
+  int64 server_time = 2;
+  bool has_change = 3; // 是否有变更
+}
+
+message GetSeqRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+}
+
+message GetSeqResponse {
+  int64 seq = 1;
+  int64 conv_seq = 2;
+}
+
+message GroupSyncRequest {
+  string user_id = 1;
+  int64 last_sync_time = 2;
+}
+
+message GroupSyncResponse {
+  repeated common.Group groups = 1;
+  map<string, common.GroupMember> memberships = 2; // 用户在群中的成员信息
+  int64 server_time = 3;
+}
+
+message FriendSyncRequest {
+  string user_id = 1;
+  int64 last_sync_time = 2;
+}
+
+message FriendSyncResponse {
+  repeated common.Friend friends = 1;
+  repeated common.FriendApply applies = 2; // 好友申请
+  int64 server_time = 3;
+}
+
+message FullSyncRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 sync_time = 3; // 客户端当前时间
+}
+
+message FullSyncResponse {
+  // 用户信息
+  common.User user_info = 1;
+
+  // 所有会话
+  repeated common.Conversation conversations = 2;
+
+  // 所有群组
+  repeated common.Group groups = 3;
+
+  // 所有好友
+  repeated common.Friend friends = 4;
+
+  // 系统时间
+  int64 server_time = 5;
+
+  // 同步完成标记
+  bool sync_completed = 6;
+}

@@ -1,0 +1,173 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/group.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 GroupServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "GroupServiceProto";
+
+// 群组服务
+service GroupService {
+  // 创建群组
+  rpc createGroup (CreateGroupRequest) returns (CreateGroupResponse);
+
+  // 获取群信息
+  rpc getGroupInfo (GroupInfoRequest) returns (common.Group);
+
+  // 更新群信息
+  rpc updateGroupInfo (UpdateGroupRequest) returns (common.Response);
+
+  // 解散群组
+  rpc dismissGroup (DismissGroupRequest) returns (common.Response);
+
+  // 获取群成员列表
+  rpc getGroupMembers (GroupMembersRequest) returns (GroupMembersResponse);
+
+  // 添加群成员
+  rpc addGroupMembers (AddMembersRequest) returns (common.Response);
+
+  // 移除群成员
+  rpc removeGroupMembers (RemoveMembersRequest) returns (common.Response);
+
+  // 更新群成员信息
+  rpc updateGroupMember (UpdateMemberRequest) returns (common.Response);
+
+  // 处理加群申请
+  rpc handleGroupApply (HandleApplyRequest) returns (common.Response);
+
+  // 获取加群申请列表
+  rpc getGroupApplies (GroupAppliesRequest) returns (GroupAppliesResponse);
+
+  // 设置/取消管理员
+  rpc setGroupAdmin (SetAdminRequest) returns (common.Response);
+
+  // 禁言/解禁成员
+  rpc muteGroupMember (MuteMemberRequest) returns (common.Response);
+
+  // 全员禁言
+  rpc muteAllMembers (MuteAllRequest) returns (common.Response);
+
+  // 转让群主
+  rpc transferGroupOwner (TransferOwnerRequest) returns (common.Response);
+}
+
+message CreateGroupRequest {
+  string creator_id = 1;
+  string name = 2;
+  string avatar_url = 3;
+  string description = 4;
+  repeated string member_ids = 5;
+  map<string, string> settings = 6; // 群设置
+}
+
+message CreateGroupResponse {
+  common.Group group = 1;
+}
+
+message GroupInfoRequest {
+  string group_id = 1;
+  bool with_members = 2; // 是否包含成员列表
+  int32 member_limit = 3; // 成员数量限制
+}
+
+message UpdateGroupRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  map<string, string> updates = 3; // 更新的字段
+}
+
+message DismissGroupRequest {
+  string group_id = 1;
+  string operator_id = 2;
+}
+
+message GroupMembersRequest {
+  string group_id = 1;
+  common.PageRequest page = 2;
+  string keyword = 3; // 搜索关键词（昵称/备注）
+  repeated int32 roles = 4; // 筛选角色
+}
+
+message GroupMembersResponse {
+  repeated common.GroupMember members = 1;
+  common.PageResponse page = 2;
+  int32 total = 3;
+}
+
+message AddMembersRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  repeated string user_ids = 3;
+  string reason = 4;
+  bool need_approval = 5; // 是否需要审批
+}
+
+message RemoveMembersRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  repeated string user_ids = 3;
+  string reason = 4;
+}
+
+message UpdateMemberRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string operator_id = 3;
+  map<string, string> updates = 4;
+}
+
+message HandleApplyRequest {
+  string apply_id = 1;
+  string handler_id = 2;
+  bool approve = 3; // true:同意 false:拒绝
+  string reason = 4;
+}
+
+message GroupAppliesRequest {
+  string group_id = 1;
+  int32 status = 2; // 申请状态
+  common.PageRequest page = 3;
+}
+
+message GroupAppliesResponse {
+  repeated common.GroupApply applies = 1;
+  common.PageResponse page = 2;
+}
+
+message SetAdminRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  string target_user_id = 3;
+  bool set_admin = 4; // true:设置管理员 false:取消管理员
+}
+
+message MuteMemberRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  string target_user_id = 3;
+  int64 mute_duration = 4; // 禁言时长（秒），0表示解禁
+  string reason = 5;
+}
+
+message MuteAllRequest {
+  string group_id = 1;
+  string operator_id = 2;
+  bool mute = 3; // true:禁言 false:解禁
+}
+
+message TransferOwnerRequest {
+  string group_id = 1;
+  string old_owner_id = 2;
+  string new_owner_id = 3;
+}

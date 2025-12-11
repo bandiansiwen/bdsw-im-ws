@@ -1,0 +1,105 @@
+syntax = "proto3";
+import "proto/common/message.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.mq;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/mq;mq";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.mq';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MqMessageProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MqMessageProto";
+
+// MQ消息格式
+message MQMessage {
+  // 消息头
+  string msg_id = 1;
+  int32 event_type = 2; // 事件类型
+  string producer = 3; // 生产者
+  int64 produce_time = 4;
+
+  // 事件类型枚举
+  enum EventType {
+    NEW_MESSAGE = 0;          // 新消息
+    MESSAGE_RECALL = 1;       // 消息撤回
+    MESSAGE_READ = 2;         // 消息已读
+    CONVERSATION_UPDATE = 3;  // 会话更新
+    USER_ONLINE = 4;          // 用户上线
+    USER_OFFLINE = 5;         // 用户下线
+    GROUP_CREATE = 6;         // 群组创建
+    GROUP_UPDATE = 7;         // 群组更新
+    GROUP_MEMBER_CHANGE = 8;  // 群成员变更
+    FRIEND_ADD = 9;           // 好友添加
+    FRIEND_DELETE = 10;       // 好友删除
+    PUSH_NOTIFICATION = 11;   // 推送通知
+    AI_CHAT_REQUEST = 12;     // AI聊天请求
+  }
+
+  // 消息体
+  oneof body {
+    MessageEvent message_event = 5;
+    UserEvent user_event = 6;
+    GroupEvent group_event = 7;
+    FriendEvent friend_event = 8;
+    PushEvent push_event = 9;
+    AIEvent ai_event = 10;
+  }
+}
+
+// 消息事件
+message MessageEvent {
+  common.Message message = 1;
+  repeated string target_user_ids = 2; // 目标用户ID列表
+  bool need_push = 3; // 是否需要推送
+  bool need_store = 4; // 是否需要存储
+  int32 push_strategy = 5; // 推送策略
+}
+
+// 用户事件
+message UserEvent {
+  string user_id = 1;
+  string device_id = 2;
+  int32 event = 3; // 1:上线 2:下线 3:状态变更
+  map<string, string> data = 4;
+}
+
+// 群组事件
+message GroupEvent {
+  string group_id = 1;
+  string operator_id = 2;
+  int32 event = 3; // 1:创建 2:更新 3:解散 4:成员变更
+  repeated string affected_user_ids = 4; // 受影响用户ID列表
+  map<string, string> data = 5;
+}
+
+// 好友事件
+message FriendEvent {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  int32 event = 3; // 1:添加 2:删除 3:申请 4:同意 5:拒绝
+  map<string, string> data = 4;
+}
+
+// 推送事件
+message PushEvent {
+  repeated string user_ids = 1;
+  string title = 2;
+  string content = 3;
+  map<string, string> payload = 4;
+  int32 push_type = 5;
+}
+
+// AI事件（用于Hula的AI聊天功能）
+message AIEvent {
+  string session_id = 1;
+  string user_id = 2;
+  string query = 3;
+  string ai_model = 4; // 使用的AI模型
+  map<string, string> parameters = 5;
+}

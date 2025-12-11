@@ -8,7 +8,7 @@ set -e
 echo "🚀 Generating Protobuf data structures (gRPC + Triple)..."
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_DIR="$PROJECT_ROOT/api"
+PROTO_DIR="$PROJECT_ROOT/proto"
 
 # 颜色输出
 GREEN='\033[0;32m'
@@ -55,14 +55,14 @@ check_tools() {
 # 清理旧的生成文件
 cleanup() {
     echo -e "${YELLOW}Cleaning up old generated files...${NC}"
-    find "$API_DIR" -name "*.pb.go" -delete
-    find "$API_DIR" -name "*_grpc.pb.go" -delete
-    find "$API_DIR" -name "*.triple.go" -delete
+    find "$PROTO_DIR" -name "*.pb.go" -delete
+    find "$PROTO_DIR" -name "*_grpc.pb.go" -delete
+    find "$PROTO_DIR" -name "*.triple.go" -delete
 }
 
 generate_proto() {
     local proto_file=$1
-    local relative_path="api/$proto_file"
+    local relative_path="proto/$proto_file"
     local service_name=$(basename "$proto_file" .proto)
 
     echo -e "${YELLOW}📦 Generating: $proto_file${NC}"
@@ -78,11 +78,11 @@ generate_proto() {
            "$relative_path"
 
     # 生成 gRPC 代码
-    echo -e "  ${BLUE}→ Generating gRPC code...${NC}"
-    protoc --proto_path="$PROJECT_ROOT" \
-           --go-grpc_out="$PROJECT_ROOT" \
-           --go-grpc_opt=paths=source_relative \
-           "$relative_path"
+#    echo -e "  ${BLUE}→ Generating gRPC code...${NC}"
+#    protoc --proto_path="$PROJECT_ROOT" \
+#           --go-grpc_out="$PROJECT_ROOT" \
+#           --go-grpc_opt=paths=source_relative \
+#           "$relative_path"
 
     # 生成 Triple 代码
     echo -e "  ${BLUE}→ Generating Triple code...${NC}"
@@ -92,9 +92,9 @@ generate_proto() {
            "$relative_path"
 
     if [ $? -eq 0 ]; then
-        local base_file="api/${proto_file%.proto}.pb.go"
-        local grpc_file="api/${proto_file%.proto}_grpc.pb.go"
-        local triple_file="api/${proto_file%.proto}.triple.go"
+        local base_file="proto/${proto_file%.proto}.pb.go"
+        local grpc_file="proto/${proto_file%.proto}_grpc.pb.go"
+        local triple_file="proto/${proto_file%.proto}.triple.go"
 
         echo -e "  ${GREEN}✅ Success: $proto_file${NC}"
         echo -e "    📄 $base_file"
@@ -117,17 +117,29 @@ main() {
 
     # 按照依赖顺序生成（common 先于其他）
     echo -e "${BLUE}=== Generating Common Proto Files ===${NC}"
-    generate_proto "common/common.proto"
+    # 使用 for 循环处理匹配到的所有文件
+    for proto_file in $PROTO_DIR/common/*.proto; do
+        # 获取相对 proto 目录的路径
+        relative_proto_path="${proto_file#$PROTO_DIR/}"
+        generate_proto "$relative_proto_path"
+    done
 
     echo -e "${BLUE}=== Generating Service Proto Files ===${NC}"
-    generate_proto "ima/ima.proto"
-    generate_proto "msg/msg.proto"
-    generate_proto "muc/muc.proto"
+    # 使用相同的方法处理 mq 和 service 目录
+    for proto_file in $PROTO_DIR/mq/*.proto; do
+        relative_proto_path="${proto_file#$PROTO_DIR/}"
+        generate_proto "$relative_proto_path"
+    done
+
+    for proto_file in $PROTO_DIR/service/*.proto; do
+        relative_proto_path="${proto_file#$PROTO_DIR/}"
+        generate_proto "$relative_proto_path"
+    done
 
     # 验证生成的文件
     echo -e "${BLUE}=== Verifying Generated Files ===${NC}"
-    local pb_files=$(find "$API_DIR" -name "*.pb.go" -type f | wc -l)
-    local triple_files=$(find "$API_DIR" -name "*.triple.go" -type f | wc -l)
+    local pb_files=$(find "$PROTO_DIR" -name "*.pb.go" -type f | wc -l)
+    local triple_files=$(find "$PROTO_DIR" -name "*.triple.go" -type f | wc -l)
     local total_files=$((pb_files + triple_files))
 
     echo -e "${GREEN}Generated: $pb_files .pb.go files, $triple_files .triple.go files${NC}"
@@ -139,14 +151,14 @@ main() {
 
     # 显示生成的文件结构
     echo -e "${BLUE}=== Generated File Structure ===${NC}"
-    find "$API_DIR" -name "*.pb.go" -o -name "*.triple.go" | sort | while read file; do
+    find "$PROTO_DIR" -name "*.pb.go" -o -name "*.triple.go" | sort | while read file; do
         echo -e "  📄 $(realpath --relative-to="$PROJECT_ROOT" "$file")"
     done
 
     # 简化验证 - 只检查生成的代码是否能编译
     echo -e "${BLUE}=== Checking Generated Code Compilation ===${NC}"
     cd "$PROJECT_ROOT"
-    if go build ./api/... 2>/dev/null; then
+    if go build ./proto/... 2>/dev/null; then
         echo -e "${GREEN}✅ Generated code compiles successfully${NC}"
     else
         echo -e "${YELLOW}⚠️ Generated code has compilation issues (may be due to module conflicts)${NC}"

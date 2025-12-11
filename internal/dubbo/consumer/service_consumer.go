@@ -4,22 +4,18 @@ import (
 	"log"
 
 	"dubbo.apache.org/dubbo-go/v3/config"
-	"github.com/bdsw/bdsw-im-ws/api/msg"
-	"github.com/bdsw/bdsw-im-ws/api/muc"
+	"github.com/bdsw/bdsw-im-ws/proto/service"
 )
 
 type IMAServiceConsumer struct {
-	MsgService msg.MsgServiceClientImpl
-	MUCService muc.MUCServiceClientImpl
+	GatewayService service.GatewayServiceClientImpl
 }
 
 func NewIMAServiceConsumer() (*IMAServiceConsumer, error) {
 	client := &IMAServiceConsumer{}
 
-	// 获取 BusinessMessageService 客户端
-	config.SetConsumerService(&client.MsgService)
-	// 获取 MUCService 客户端
-	config.SetConsumerService(&client.MUCService)
+	// 获取 GatewayService 客户端
+	config.SetConsumerService(&client.GatewayService)
 
 	log.Println("Dubbo clients initialized successfully")
 	return client, nil

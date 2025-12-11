@@ -1,0 +1,89 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/message.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 GatewayServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "GatewayServiceProto";
+
+// 网关服务接口（供bdsw-im-ws调用）
+service GatewayService {
+  // 客户端消息上行
+  rpc handleClientMessage (ClientMessageRequest) returns (ClientMessageResponse);
+
+  // 获取待推送消息
+  rpc fetchPendingMessages (FetchMessagesRequest) returns (stream common.Message);
+
+  // 通知消息已送达
+  rpc notifyMessageDelivered (DeliveredNotification) returns (common.Response);
+
+  // 通知消息已读
+  rpc notifyMessageRead (ReadNotification) returns (common.Response);
+
+  // 心跳检测
+  rpc heartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+
+  // 客户端主动断开连接
+  rpc clientDisconnect (DisconnectRequest) returns (common.Response);
+}
+
+message ClientMessageRequest {
+  bytes message = 1;
+}
+
+message ClientMessageResponse {
+  string msg_id = 1;
+  int64 server_time = 2;
+  common.Message.MessageStatus status = 3;
+  string error_msg = 4; // 错误信息
+}
+
+message FetchMessagesRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 last_seq = 3; // 客户端已处理的最大消息序列号
+  int32 batch_size = 4; // 批量大小
+}
+
+message DeliveredNotification {
+  string user_id = 1;
+  string device_id = 2;
+  repeated string msg_ids = 3; // 已送达的消息ID列表
+  int64 deliver_time = 4;
+}
+
+message ReadNotification {
+  string user_id = 1;
+  string device_id = 2;
+  string conversation_id = 3;
+  int64 read_seq = 4; // 已读到的消息序列号
+  int64 read_time = 5;
+}
+
+message HeartbeatRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 client_time = 3;
+}
+
+message HeartbeatResponse {
+  int64 server_time = 1;
+  bool need_sync = 2; // 是否需要同步消息
+}
+
+message DisconnectRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int32 reason = 3; // 断开原因: 0:正常退出 1:网络异常 2:被踢下线
+}

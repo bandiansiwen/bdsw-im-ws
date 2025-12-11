@@ -1,0 +1,50 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/push.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 WsServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "WsServiceProto";
+
+// WebSocket 服务接口（供其他微服务调用）
+service WsService {
+  // 向指定用户推送消息（使用通用结构）
+  rpc PushToTarget (common.PushRequest) returns (common.PushResponse);
+
+  // 踢用户下线
+  rpc KickTarget (WsKickUserRequest) returns (common.Response);
+
+  // 广播消息（给所有在线用户）
+  rpc broadcast (common.PushBroadcastRequest) returns (WsBroadcastResponse);
+
+}
+
+// 踢用户下线
+message WsKickUserRequest {
+  // 推送设备目标列表（必填）
+  // 所有推送最终都归结为设备列表
+  common.DeviceTargetList target_devices = 1;
+  string operator_id = 2;                  // 操作人ID（可选）
+  int32 reason = 3;                        // 下线原因：0-正常下线 1-被踢下线 2-账号异常 3-多端登录冲突
+  string reason_message = 4;               // 原因描述
+  repeated string exclude_device_ids = 5;  // 排除的设备ID（不踢下线）
+}
+
+// 广播响应
+message WsBroadcastResponse {
+  int64 total_users = 1;                   // 总在线用户数
+  int64 pushed_users = 2;                  // 已推送用户数
+  int64 failed_users = 3;                  // 推送失败用户数
+  string task_id = 4;
+}

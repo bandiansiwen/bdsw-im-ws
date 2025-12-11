@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 UserProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "UserProto";
+
+// 用户信息
+message User {
+  string user_id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar_url = 4;
+  string phone = 5;
+  string email = 6;
+  int32 gender = 7;                         // 0:未知 1:男 2:女
+  string signature = 8;                     // 个性签名
+  int32 status = 9;                         // 用户状态: 0:正常 1:禁用 2:注销
+
+  // 用户在线状态（需要在User消息中引用）
+  enum OnlineStatus {
+    OFFLINE = 0;
+    ONLINE = 1;
+    AWAY = 2;
+    BUSY = 3;
+    INVISIBLE = 4;
+  }
+  
+  // 在线状态
+  OnlineStatus online_status = 10;
+  int64 last_online_time = 11;
+
+  // 扩展字段
+  map<string, string> extras = 12;
+}
+
+// 好友关系（需要独立定义）
+message Friend {
+  string user_id = 1;
+  string friend_id = 2;
+  string remark = 3;                         // 备注
+  string alias = 4;                          // 别名（好友看到的昵称）
+  repeated string tags = 5;                  // 标签
+  bool is_blocked = 6;                       // 是否拉黑
+  bool is_muted = 7;                         // 是否免打扰
+  int32 relation = 8;                        // 关系类型: 1:好友 2:特别关心 3:陌生人
+  int64 add_time = 9;
+  string group_id = 10;                      // 所属分组ID
+}
+
+// 好友申请（需要独立定义）
+message FriendApply {
+  string apply_id = 1;
+  string from_user_id = 2;
+  string to_user_id = 3;
+  string apply_reason = 4;
+  int32 status = 5;                          // 0:待处理 1:同意 2:拒绝 3:忽略
+  string handle_reason = 6;
+  int64 apply_time = 7;
+  int64 handle_time = 8;
+  string source = 9;                         // 来源：二维码/群聊/搜索
+}

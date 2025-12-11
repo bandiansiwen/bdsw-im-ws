@@ -1,0 +1,190 @@
+syntax = "proto3";
+import "proto/common/message.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 PushProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "PushProto";
+
+// ==================== 推送设备目标 ====================
+// 最基本的推送目标：一个设备
+message DeviceTarget {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+// 设备目标列表
+message DeviceTargetList {
+  repeated DeviceTarget devices = 1;
+}
+
+// ==================== 推送请求 ====================
+// 通用推送请求
+message PushRequest {
+  // 推送ID（唯一标识）
+  string push_id = 1;
+
+  // 推送设备目标列表（必填）
+  // 所有推送最终都归结为设备列表
+  DeviceTargetList target_devices = 2;
+
+  // 消息内容（必填）
+  Message message = 3;
+
+  // 推送选项
+  PushOptions options = 4;
+
+  // 原始推送类型（用于日志和统计）
+  enum PushType {
+    SINGLE_USER = 0;      // 单用户推送
+    MULTI_USER = 1;       // 多用户推送
+    SINGLE_DEVICE = 2;    // 单设备推送
+    MULTI_DEVICE = 3;     // 多设备推送
+    GROUP = 4;            // 群组推送
+    CONVERSATION = 5;     // 会话推送
+    BROADCAST = 6;        // 广播推送
+  }
+  PushType push_type = 5;
+
+  // 来源信息（原始请求者）
+  string source_user_id = 6;     // 来源用户ID（可选）
+  string source_device_id = 7;   // 来源设备ID（可选）
+
+  // 请求信息
+  string request_id = 8;         // 请求ID
+  string source_service = 9;     // 来源服务
+
+  // 上下文信息（原始目标，用于重试等场景）
+  oneof original_target {
+    string original_user_id = 10;         // 原始用户ID
+    string original_group_id = 11;        // 原始群组ID
+    string original_conversation_id = 12; // 原始会话ID
+  }
+
+  // 时间信息
+  int64 create_time = 13;
+  int64 schedule_time = 14;      // 计划推送时间
+
+  // 扩展字段
+  map<string, string> extras = 15;
+}
+
+// ==================== 推送选项 ====================
+message PushOptions {
+  // 推送优先级
+  enum Priority {
+    LOW = 0;        // 低优先级（可延迟）
+    NORMAL = 1;     // 普通优先级
+    HIGH = 2;       // 高优先级（立即发送）
+    CRITICAL = 3;   // 关键优先级（必达）
+  }
+  Priority priority = 1;
+
+  // 消息持久化选项
+  bool need_persist = 2;                    // 是否需要持久化到DB
+  bool need_store = 3;                      // 是否需要存储到消息历史
+  bool need_receipt = 4;                    // 是否需要送达回执
+  bool need_read_receipt = 5;               // 是否需要已读回执
+
+  // 推送控制
+  bool skip_if_offline = 6;                 // 如果设备离线是否跳过（仅对离线推送有效）
+  int64 expire_time = 7;                    // 过期时间戳（秒）
+
+  // 重试策略
+  int32 max_retry = 8;                      // 最大重试次数
+  int64 retry_interval = 9;                 // 重试间隔（秒）
+
+  // 推送展示
+  bool show_notification = 10;              // 是否显示通知
+  string notification_title = 11;           // 通知标题
+  string notification_body = 12;            // 通知内容
+  string notification_sound = 13;           // 通知声音
+
+  // 设备同步策略
+  enum SyncStrategy {
+    SYNC_ALL = 0;           // 同步到所有目标设备
+    SYNC_EXCEPT_SOURCE = 1; // 同步到除来源外的设备
+    SYNC_NONE = 2;          // 不进行设备间同步
+  }
+  SyncStrategy sync_strategy = 14;
+
+  // 多端消息去重
+  string dedup_key = 15;                    // 去重键
+  int32 dedup_window = 16;                  // 去重窗口（秒）
+
+  // 扩展选项
+  map<string, string> extras = 17;
+}
+
+// ==================== 推送结果 ====================
+message PushResult {
+  // 设备目标
+  string user_id = 1;
+  string device_id = 2;
+
+  // 推送状态
+  enum ResultStatus {
+    PENDING = 0;      // 等待中
+    SUCCESS = 1;      // 成功
+    FAILED = 2;       // 失败
+    SKIPPED = 3;      // 跳过（如设备离线且skip_if_offline=true）
+    RETRYING = 4;     // 重试中
+  }
+  ResultStatus status = 3;
+
+  // 详细信息
+  string error_message = 4;        // 错误信息
+  string platform_message_id = 5;  // 平台消息ID（APNS/FCM等）
+  int64 push_time = 6;             // 推送时间
+  int64 delivery_time = 7;         // 送达时间
+  string connection_id = 8;        // 连接ID（WebSocket推送）
+
+  // 扩展信息
+  map<string, string> details = 9;
+}
+
+// ==================== 推送响应 ====================
+message PushResponse {
+  // 推送ID
+  string push_id = 1;
+
+  // 总体状态
+  bool accepted = 2;            // 是否已接受
+  bool success = 3;             // 总体是否成功
+  string message = 4;           // 响应消息
+
+  // 统计信息
+  int32 total_targets = 5;      // 总设备目标数
+  int32 success_count = 6;      // 成功数
+  int32 failed_count = 7;       // 失败数
+  int32 skipped_count = 8;      // 跳过数
+
+  // 详细结果
+  repeated PushResult results = 9;
+
+  // 时间信息
+  int64 start_time = 10;        // 开始时间
+  int64 end_time = 11;          // 结束时间
+
+  // 扩展信息
+  map<string, string> stats = 12;
+}
+
+// 广播请求
+message PushBroadcastRequest {
+  common.Message message = 1;
+  common.PushOptions options = 2;
+  string request_id = 3;
+  string source_service = 4;
+  repeated string exclude_user_ids = 5;    // 排除的用户ID
+}

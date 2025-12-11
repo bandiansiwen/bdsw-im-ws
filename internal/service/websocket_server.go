@@ -84,10 +84,6 @@ func (s *WebSocketServer) handleWebSocket(rw http.ResponseWriter, r *http.Reques
 	handler(conn, userID, token, deviceID)
 }
 
-func (s *WebSocketServer) Shutdown() {
-	log.Println("WebSocket server shutdown")
-}
-
 func generateRandomString(length int) string {
 	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
 	result := make([]byte, length)

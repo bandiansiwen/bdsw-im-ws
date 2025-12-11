@@ -1,0 +1,136 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/user.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 AuthServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "AuthServiceProto";
+
+
+// 认证服务
+service AuthService {
+  // 密码登录
+  rpc loginByPassword (PasswordLoginRequest) returns (LoginResponse);
+
+  // Token登录/验证
+  rpc loginByToken (TokenLoginRequest) returns (LoginResponse);
+
+  // 二维码登录（生成二维码）
+  rpc generateLoginQRCode (GenerateQRCodeRequest) returns (QRCodeResponse);
+
+  // 二维码登录（扫码确认）
+  rpc confirmQRCodeLogin (ConfirmQRCodeRequest) returns (LoginResponse);
+
+  // 登出
+  rpc logout (LogoutRequest) returns (common.Response);
+
+  // 刷新Token
+  rpc refreshToken (RefreshTokenRequest) returns (TokenResponse);
+
+  // 验证Token
+  rpc verifyToken (VerifyTokenRequest) returns (VerifyTokenResponse);
+
+  // 强制下线（多设备管理）
+  rpc forceLogout (ForceLogoutRequest) returns (common.Response);
+
+  // 获取用户设备列表
+  rpc getUserDevices (UserDevicesRequest) returns (UserDevicesResponse);
+}
+
+// 请求/响应消息定义
+message PasswordLoginRequest {
+  string username = 1;
+  string password = 2;
+  common.DeviceInfo device_info = 3;
+  string captcha = 4; // 验证码
+}
+
+message TokenLoginRequest {
+  string token = 1;
+  common.DeviceInfo device_info = 2;
+}
+
+message GenerateQRCodeRequest {
+  string device_id = 1;
+  int32 expire_seconds = 2; // 二维码过期时间（秒）
+}
+
+message QRCodeResponse {
+  string qrcode_id = 1;
+  string qrcode_url = 2;
+  string qrcode_data = 3; // base64编码的二维码图片
+  int64 expire_at = 4;
+}
+
+message ConfirmQRCodeRequest {
+  string qrcode_id = 1;
+  string user_id = 2;
+  bool confirm = 3; // true:确认登录 false:取消登录
+}
+
+message LoginResponse {
+  common.User user = 1;
+  AuthToken auth_token = 2;
+  common.DeviceInfo device_info = 3;
+  repeated common.DeviceInfo other_devices = 4; // 其他在线设备
+}
+
+message LogoutRequest {
+  string user_id = 1;
+  string device_id = 2;
+  bool logout_all = 3; // 是否登出所有设备
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message TokenResponse {
+  AuthToken auth_token = 1;
+}
+
+message VerifyTokenRequest {
+  string token = 1;
+  string required_permission = 2; // 需要的权限
+}
+
+message VerifyTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+  repeated string permissions = 3; // 用户拥有的权限
+  int64 expire_at = 4;
+}
+
+message ForceLogoutRequest {
+  string operator_id = 1; // 操作人ID
+  string target_user_id = 2;
+  string target_device_id = 3; // 为空则踢出所有设备
+}
+
+message UserDevicesRequest {
+  string user_id = 1;
+}
+
+message UserDevicesResponse {
+  repeated common.DeviceInfo devices = 1;
+}
+
+// 认证令牌
+message AuthToken {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 access_expire_at = 3;
+  int64 refresh_expire_at = 4;
+  string token_type = 5; // Bearer
+}

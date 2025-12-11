@@ -1,0 +1,513 @@
+syntax = "proto3";
+import "proto/common/common.proto";
+import "proto/common/user.proto";
+import "proto/common/device.proto";
+
+// Java 包的命名空间
+package com.bdsw.proto.service;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/service;service";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.service';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 MucServiceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "MucServiceProto";
+
+// 用户中心服务接口
+service MucService {
+  // ==================== 用户基本信息 ====================
+  // 获取用户信息
+  rpc GetUserInfo(GetUserRequest) returns (GetUserResponse);
+
+  // 批量获取用户信息
+  rpc BatchGetUserInfo(BatchGetUserRequest) returns (BatchGetUserResponse);
+
+  // 更新用户信息
+  rpc UpdateUserInfo(UpdateUserRequest) returns (common.Response);
+
+  // 搜索用户
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
+
+  // 用户在线状态
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (common.Response);
+
+  // 获取用户状态
+  rpc GetUserStatus(GetUserStatusRequest) returns (GetUserStatusResponse);
+
+  // 更新用户设置
+  rpc UpdateUserSettings(UpdateUserSettingsRequest) returns (common.Response);
+
+  // 获取用户设置
+  rpc GetUserSettings(GetUserSettingsRequest) returns (GetUserSettingsResponse);
+
+  // ==================== 好友关系管理 ====================
+  // 添加好友
+  rpc AddFriend(AddFriendRequest) returns (common.Response);
+
+  // 删除好友
+  rpc DeleteFriend(DeleteFriendRequest) returns (common.Response);
+
+  // 获取好友列表
+  rpc GetFriendList(GetFriendListRequest) returns (GetFriendListResponse);
+
+  // 获取好友关系
+  rpc GetFriendRelation(GetFriendRelationRequest) returns (GetFriendRelationResponse);
+
+  // 更新好友备注
+  rpc UpdateFriendRemark(UpdateFriendRemarkRequest) returns (common.Response);
+
+  // 设置好友标签
+  rpc SetFriendTag(SetFriendTagRequest) returns (common.Response);
+
+  // 设置好友免打扰
+  rpc SetFriendMute(SetFriendMuteRequest) returns (common.Response);
+
+  // 拉黑/取消拉黑好友
+  rpc BlockFriend(BlockFriendRequest) returns (common.Response);
+
+  // ==================== 好友申请管理 ====================
+  // 发送好友申请
+  rpc SendFriendApply(SendFriendApplyRequest) returns (common.Response);
+
+  // 处理好友申请
+  rpc HandleFriendApply(HandleFriendApplyRequest) returns (common.Response);
+
+  // 获取好友申请列表
+  rpc GetFriendApplies(GetFriendAppliesRequest) returns (GetFriendAppliesResponse);
+
+  // ==================== 用户分组/标签管理 ====================
+  // 创建好友分组
+  rpc CreateFriendGroup(CreateFriendGroupRequest) returns (common.Response);
+
+  // 更新好友分组
+  rpc UpdateFriendGroup(UpdateFriendGroupRequest) returns (common.Response);
+
+  // 删除好友分组
+  rpc DeleteFriendGroup(DeleteFriendGroupRequest) returns (common.Response);
+
+  // 获取好友分组列表
+  rpc GetFriendGroups(GetFriendGroupsRequest) returns (GetFriendGroupsResponse);
+
+  // 移动好友到分组
+  rpc MoveFriendToGroup(MoveFriendToGroupRequest) returns (common.Response);
+
+  // ==================== 用户在线状态同步 ====================
+  // 同步用户状态变更（内部使用，由bdsw-im-ws调用）
+  rpc SyncUserStatus(SyncUserStatusRequest) returns (common.Response);
+
+  // 获取用户在线状态列表
+  rpc BatchGetUserStatus(BatchGetUserStatusRequest) returns (BatchGetUserStatusResponse);
+
+  // ==================== 用户扩展功能 ====================
+  // 获取用户二维码
+  rpc GetUserQRCode(GetUserQRCodeRequest) returns (GetUserQRCodeResponse);
+
+  // 验证用户二维码
+  rpc VerifyUserQRCode(VerifyUserQRCodeRequest) returns (VerifyUserQRCodeResponse);
+
+  // 更新用户隐私设置
+  rpc UpdateUserPrivacy(UpdateUserPrivacyRequest) returns (common.Response);
+
+  // 获取用户隐私设置
+  rpc GetUserPrivacy(GetUserPrivacyRequest) returns (GetUserPrivacyResponse);
+
+  // ==================== 设备管理 ====================
+  // 注册设备
+  rpc RegisterDevice(common.RegisterDeviceRequest) returns (common.Response);
+
+  // 更新设备信息
+  rpc UpdateDevice(common.UpdateDeviceRequest) returns (common.Response);
+
+  // 获取用户设备列表
+  rpc GetUserDevices(GetUserDevicesRequest) returns (GetUserDevicesResponse);
+
+  // 删除设备
+  rpc DeleteDevice(DeleteDeviceRequest) returns (common.Response);
+
+  // 设置主设备
+  rpc SetPrimaryDevice(SetPrimaryDeviceRequest) returns (common.Response);
+
+  // 同步设备状态（由bdsw-im-ws调用）
+  rpc SyncDeviceStatus(common.DeviceStatusSync) returns (common.Response);
+
+  // 获取设备推送设置
+  rpc GetDevicePushSettings(GetDeviceSettingsRequest) returns (GetDeviceSettingsResponse);
+
+  // 更新设备推送设置
+  rpc UpdateDevicePushSettings(UpdateDeviceSettingsRequest) returns (common.Response);
+}
+
+// ==================== 请求/响应消息定义 ====================
+
+// 获取用户信息请求
+message GetUserRequest {
+  string user_id = 1;                      // 用户ID
+  string requestor_id = 2;                 // 请求者ID（用于权限检查）
+  bool with_extended_info = 3;             // 是否包含扩展信息
+}
+
+// 获取用户信息响应
+message GetUserResponse {
+  common.User user = 1;
+  map<string, string> extended_info = 2;   // 扩展信息
+  bool is_friend = 3;                      // 是否是好友
+  string friend_remark = 4;                // 好友备注
+}
+
+// 批量获取用户信息请求
+message BatchGetUserRequest {
+  repeated string user_ids = 1;
+  string requestor_id = 2;
+}
+
+// 批量获取用户信息响应
+message BatchGetUserResponse {
+  repeated common.User users = 1;
+  repeated string not_found_ids = 2;       // 未找到的用户ID
+}
+
+// 更新用户信息请求
+message UpdateUserRequest {
+  string user_id = 1;
+  map<string, string> updates = 2;         // 更新的字段
+  // 常见字段：nickname, avatar_url, signature, gender, birthday, location
+}
+
+// 搜索用户请求
+message SearchUsersRequest {
+  string keyword = 1;                       // 搜索关键词（昵称/手机号/邮箱）
+  string requestor_id = 2;
+  common.PageRequest page = 3;
+  repeated string filters = 4;              // 筛选条件
+}
+
+// 搜索用户响应
+message SearchUsersResponse {
+  repeated common.User users = 1;
+  common.PageResponse page = 2;
+  int32 total = 3;
+}
+
+// 更新用户状态请求
+message UpdateUserStatusRequest {
+  string user_id = 1;
+  common.User.OnlineStatus status = 2;     // 在线状态
+  string status_message = 3;               // 状态消息（如："会议中"、"游戏中"）
+  bool broadcast_to_friends = 4;           // 是否广播给好友
+}
+
+// 获取用户状态请求
+message GetUserStatusRequest {
+  string user_id = 1;
+  string requestor_id = 2;                 // 请求者ID（可能受隐私设置限制）
+}
+
+// 获取用户状态响应
+message GetUserStatusResponse {
+  string user_id = 1;
+  common.User.OnlineStatus status = 2;
+  string status_message = 3;
+  int64 last_online_time = 4;              // 最后在线时间
+  bool is_online = 5;                      // 是否在线
+  bool can_see_status = 6;                 // 请求者是否有权查看状态
+}
+
+// 更新用户设置请求
+message UpdateUserSettingsRequest {
+  string user_id = 1;
+  map<string, string> settings = 2;        // 设置项
+  // 常见设置：notification_enabled, message_receipt, theme, language, font_size
+}
+
+// 获取用户设置请求
+message GetUserSettingsRequest {
+  string user_id = 1;
+  repeated string setting_keys = 2;        // 需要获取的设置键（空表示获取所有）
+}
+
+// 获取用户设置响应
+message GetUserSettingsResponse {
+  string user_id = 1;
+  map<string, string> settings = 2;
+}
+
+// 添加好友请求
+message AddFriendRequest {
+  string user_id = 1;                      // 发起者
+  string friend_id = 2;                    // 好友ID
+  string remark = 3;                       // 好友备注
+  string apply_reason = 4;                 // 申请理由
+  repeated string tags = 5;                // 标签
+  string source = 6;                       // 来源：二维码/群聊/搜索
+}
+
+// 删除好友请求
+message DeleteFriendRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  bool delete_both_ways = 3;               // 是否双向删除
+}
+
+// 获取好友列表请求
+message GetFriendListRequest {
+  string user_id = 1;
+  bool with_status = 2;                    // 是否包含在线状态
+  string group_id = 3;                     // 分组ID（可选）
+}
+
+// 获取好友列表响应
+message GetFriendListResponse {
+  repeated common.Friend friends = 1;
+  int32 total = 2;
+  map<string, common.User.OnlineStatus> friend_statuses = 3; // 好友状态
+}
+
+// 获取好友关系请求
+message GetFriendRelationRequest {
+  string user_id = 1;
+  string friend_id = 2;
+}
+
+// 获取好友关系响应
+message GetFriendRelationResponse {
+  bool is_friend = 1;
+  common.Friend friend_info = 2;           // 好友关系信息
+  string relation_status = 3;              // 关系状态：正常/拉黑/删除
+}
+
+// 更新好友备注请求
+message UpdateFriendRemarkRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  string remark = 3;
+}
+
+// 设置好友标签请求
+message SetFriendTagRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  repeated string tags = 3;                // 标签列表
+}
+
+// 设置好友免打扰请求
+message SetFriendMuteRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  bool mute = 3;                           // true: 免打扰 false: 取消免打扰
+}
+
+// 拉黑好友请求
+message BlockFriendRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  bool block = 3;                          // true: 拉黑 false: 取消拉黑
+}
+
+// 发送好友申请请求
+message SendFriendApplyRequest {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  string apply_reason = 3;
+  string source = 4;                       // 来源
+}
+
+// 处理好友申请请求
+message HandleFriendApplyRequest {
+  string apply_id = 1;
+  string handler_id = 2;                   // 处理人ID
+  bool approve = 3;                        // true: 同意 false: 拒绝
+  string handle_reason = 4;                // 处理理由
+}
+
+// 获取好友申请列表请求
+message GetFriendAppliesRequest {
+  string user_id = 1;
+  int32 status = 2;                        // 申请状态：0-待处理 1-已同意 2-已拒绝
+  common.PageRequest page = 3;
+}
+
+// 获取好友申请列表响应
+message GetFriendAppliesResponse {
+  repeated common.FriendApply applies = 1;
+  common.PageResponse page = 2;
+  int32 total = 3;
+}
+
+// 好友分组
+message FriendGroup {
+  string group_id = 1;
+  string user_id = 2;
+  string name = 3;
+  int32 order = 4;                         // 排序号
+  int32 friend_count = 5;                  // 好友数量
+  int64 create_time = 6;
+  int64 update_time = 7;
+}
+
+// 创建好友分组请求
+message CreateFriendGroupRequest {
+  string user_id = 1;
+  string name = 2;
+}
+
+// 更新好友分组请求
+message UpdateFriendGroupRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string name = 3;
+}
+
+// 删除好友分组请求
+message DeleteFriendGroupRequest {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+// 获取好友分组列表请求
+message GetFriendGroupsRequest {
+  string user_id = 1;
+}
+
+// 获取好友分组列表响应
+message GetFriendGroupsResponse {
+  repeated FriendGroup groups = 1;
+  int32 total = 2;
+}
+
+// 移动好友到分组请求
+message MoveFriendToGroupRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  string group_id = 3;                     // 目标分组ID，空表示移出分组
+}
+
+// 同步用户状态变更请求（内部使用）
+message SyncUserStatusRequest {
+  string user_id = 1;
+  common.User.OnlineStatus status = 2;
+  bool is_online = 3;                      // 是否在线
+  int64 timestamp = 4;
+  repeated string changed_fields = 5;      // 变更的字段
+}
+
+// 批量获取用户状态请求
+message BatchGetUserStatusRequest {
+  repeated string user_ids = 1;
+  string requestor_id = 2;
+}
+
+// 批量获取用户状态响应
+message BatchGetUserStatusResponse {
+  message UserStatusInfo {
+    string user_id = 1;
+    common.User.OnlineStatus status = 2;
+    bool is_online = 3;
+    int64 last_online_time = 4;
+    bool can_see = 5;                      // 请求者是否有权查看
+  }
+  repeated UserStatusInfo statuses = 1;
+}
+
+// 获取用户二维码请求
+message GetUserQRCodeRequest {
+  string user_id = 1;
+  int32 qr_type = 2;                       // 二维码类型：0-加好友 1-加群 2-登录
+  int32 expire_seconds = 3;                // 过期时间（秒）
+}
+
+// 获取用户二维码响应
+message GetUserQRCodeResponse {
+  string qr_code_id = 1;
+  string qr_code_url = 2;
+  string qr_code_data = 3;                 // Base64编码的二维码图片
+  int64 expire_at = 4;
+}
+
+// 验证用户二维码请求
+message VerifyUserQRCodeRequest {
+  string qr_code_id = 1;
+  string scanner_id = 2;                   // 扫描者ID
+}
+
+// 验证用户二维码响应
+message VerifyUserQRCodeResponse {
+  bool valid = 1;
+  string user_id = 2;                      // 二维码所属用户
+  int32 qr_type = 3;                       // 二维码类型
+  map<string, string> extra_data = 4;      // 额外数据
+}
+
+// 隐私设置
+message PrivacySetting {
+  string key = 1;                          // 设置键
+  string value = 2;                        // 设置值
+  string description = 3;                  // 描述
+}
+
+// 更新用户隐私设置请求
+message UpdateUserPrivacyRequest {
+  string user_id = 1;
+  repeated PrivacySetting settings = 2;
+}
+
+// 获取用户隐私设置请求
+message GetUserPrivacyRequest {
+  string user_id = 1;
+}
+
+// 获取用户隐私设置响应
+message GetUserPrivacyResponse {
+  string user_id = 1;
+  repeated PrivacySetting settings = 2;
+}
+
+// 获取用户设备列表请求
+message GetUserDevicesRequest {
+  string user_id = 1;
+  string requestor_id = 2;                  // 请求者ID（可能是自己或管理员）
+  bool with_connections = 3;                // 是否包含连接信息
+  bool only_online = 4;                     // 是否只获取在线设备
+}
+
+// 获取用户设备列表响应
+message GetUserDevicesResponse {
+  common.UserDevices user_devices = 1;
+}
+
+// 删除设备请求
+message DeleteDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;
+  bool logout_all_sessions = 3;             // 是否登出该设备的所有会话
+}
+
+// 设置主设备请求
+message SetPrimaryDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+// 获取设备设置请求
+message GetDeviceSettingsRequest {
+  string user_id = 1;
+  string device_id = 2;
+}
+
+// 获取设备设置响应
+message GetDeviceSettingsResponse {
+  common.Device.PushSettings push_settings = 1;
+  map<string, string> other_settings = 2;
+}
+
+// 更新设备设置请求
+message UpdateDeviceSettingsRequest {
+  string user_id = 1;
+  string device_id = 2;
+  common.Device.PushSettings push_settings = 3;
+  map<string, string> other_settings = 4;
+}

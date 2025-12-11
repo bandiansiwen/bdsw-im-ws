@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+// Java 包的命名空间
+package com.bdsw.proto.common;
+
+// Go 包配置：指定生成的 Go 代码的导入路径和包名
+option go_package = "github.com/bdsw/bdsw-im-ws/proto/common;common";
+
+// Java 包配置：明确指定生成的 Java 类所在的包，与开头的 package 声明一致
+option java_package = 'com.bdsw.proto.common';
+//文件生成方式：为 true 时，每个消息类型都会生成独立的 Java 文件
+// 如果为 false，则所有类型都会嵌套在外部类中
+option java_multiple_files = true;
+//外部类名：指定生成的主 Java 类名为 DeviceProto
+//当 java_multiple_files = false 时，所有类型都会在这个类内部定义
+option java_outer_classname = "DeviceProto";
+
+// 设备信息
+message Device {
+  string device_id = 1;                      // 设备唯一标识
+  string user_id = 2;                        // 所属用户ID
+  string platform = 3;                       // 平台：ios/android/web/pc/mac
+  string device_name = 4;                    // 设备名称：iPhone 13 Pro
+  string device_model = 5;                   // 设备型号
+  string os_version = 6;                     // 操作系统版本
+  string app_version = 7;                    // 应用版本
+  string push_token = 8;                     // 推送令牌（APNS/FCM/厂商）
+  string language = 9;                       // 语言设置
+  string timezone = 10;                      // 时区
+
+  // 连接状态
+  bool is_online = 11;                       // 是否在线
+  string connection_id = 12;                 // 当前连接ID（如果在线）
+  string server_host = 13;                   // 连接的服务器主机
+  int64 last_connect_time = 14;              // 最后连接时间
+  int64 last_active_time = 15;               // 最后活跃时间
+  int64 last_disconnect_time = 16;           // 最后断开时间
+
+  // 设备能力
+  message Capabilities {
+    bool supports_push = 1;                  // 是否支持推送
+    bool supports_voice = 2;                 // 是否支持语音
+    bool supports_video = 3;                 // 是否支持视频
+    bool supports_file = 4;                  // 是否支持文件传输
+    repeated string message_types = 5;       // 支持的消息类型
+    int64 max_message_size = 6;              // 最大消息大小（字节）
+    bool background_push = 7;                // 是否支持后台推送
+  }
+  Capabilities capabilities = 17;
+
+  // 推送设置
+  message PushSettings {
+    bool enabled = 1;                        // 是否开启推送
+    bool sound = 2;                          // 是否播放声音
+    bool vibrate = 3;                        // 是否震动
+    bool badge = 4;                          // 是否显示角标
+    bool show_content = 5;                   // 是否显示消息内容
+    repeated string mute_hours = 6;          // 免打扰时段
+    repeated string priority_types = 7;      // 高优先级消息类型
+  }
+  PushSettings push_settings = 18;
+
+  // 状态
+  bool is_active = 19;                       // 是否是活跃设备
+  bool is_primary = 20;                      // 是否是主设备
+  int32 login_count = 21;                    // 登录次数
+  int64 create_time = 22;                    // 设备注册时间
+  int64 update_time = 23;                    // 最后更新时间
+
+  // 安全信息
+  string fingerprint = 24;                   // 设备指纹
+  string ip_address = 25;                    // 最后登录IP
+  string location = 26;                      // 大致地理位置
+
+  // 扩展字段
+  map<string, string> extras = 27;
+}
+
+// 设备连接信息（WebSocket连接相关）
+message DeviceConnection {
+  string connection_id = 1;                  // 连接唯一ID
+  string device_id = 2;                      // 设备ID
+  string user_id = 3;                        // 用户ID
+  string server_instance = 4;                // 服务器实例标识
+  string client_ip = 5;                      // 客户端IP
+  int64 connect_time = 6;                    // 连接建立时间
+  int64 last_heartbeat = 7;                  // 最后心跳时间
+  int64 message_count = 8;                   // 消息数量
+  ConnectionStatus status = 9;               // 连接状态
+
+  enum ConnectionStatus {
+    CONNECTED = 0;          // 已连接
+    DISCONNECTED = 1;       // 已断开
+    RECONNECTING = 2;       // 重连中
+    AUTHENTICATING = 3;     // 认证中
+  }
+}
+
+// 用户设备列表
+message UserDevices {
+  string user_id = 1;
+  repeated Device devices = 2;               // 所有设备
+  map<string, DeviceConnection> connections = 3; // 当前连接
+  int32 online_count = 4;                    // 在线设备数
+  int32 total_count = 5;                     // 总设备数
+  string primary_device_id = 6;              // 主设备ID
+}
+
+// 设备注册请求
+message RegisterDeviceRequest {
+  string user_id = 1;
+  Device device = 2;                         // 设备信息
+  bool is_primary = 3;                       // 是否设为主设备
+}
+
+// 设备更新请求
+message UpdateDeviceRequest {
+  string device_id = 1;
+  string user_id = 2;
+  map<string, string> updates = 3;          // 更新的字段
+}
+
+// 设备状态同步消息（用于服务间通信）
+message DeviceStatusSync {
+  string device_id = 1;
+  string user_id = 2;
+  bool is_online = 3;                       // 是否上线
+  int64 timestamp = 4;                      // 状态变更时间
+  string connection_id = 5;                 // 连接ID（如果上线）
+  string event_type = 6;                    // 事件类型：connect/disconnect/timeout
+  map<string, string> context = 7;          // 上下文信息
+}
+
+// 设备推送目标
+message PushTarget {
+  string user_id = 1;
+  repeated string device_ids = 2;           // 目标设备ID列表
+  repeated string exclude_device_ids = 3;   // 排除的设备ID列表
+  PushStrategy strategy = 4;                // 推送策略
+
+  enum PushStrategy {
+    ALL_DEVICES = 0;          // 所有设备
+    SPECIFIC_DEVICES = 1;     // 指定设备
+    EXCLUDE_DEVICES = 2;      // 排除某些设备
+    PRIMARY_ONLY = 3;         // 仅主设备
+    ONLINE_ONLY = 4;          // 仅在线设备
+    SMART_ROUTING = 5;        // 智能路由
+  }
+}

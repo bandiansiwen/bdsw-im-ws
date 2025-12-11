@@ -2,17 +2,16 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
+	"slices"
 	"sync"
 	"time"
 
-	"github.com/bdsw/bdsw-im-ws/api/common"
-	"github.com/bdsw/bdsw-im-ws/api/ima"
-	"github.com/bdsw/bdsw-im-ws/api/muc"
 	"github.com/bdsw/bdsw-im-ws/internal/config"
 	"github.com/bdsw/bdsw-im-ws/internal/dubbo/consumer"
+	"github.com/bdsw/bdsw-im-ws/proto/common"
+	dubboservice "github.com/bdsw/bdsw-im-ws/proto/service"
 
 	"github.com/bdsw/bdsw-im-ws/internal/redis"
 	"github.com/bdsw/bdsw-im-ws/pkg/utils"
@@ -28,9 +27,6 @@ type GatewayService struct {
 	// 连接管理
 	userConnections *UserConnectionManager
 	websocketServer *WebSocketServer
-
-	// Token 缓存
-	tokenCache *TokenCache
 
 	// 服务状态
 	started bool
@@ -52,7 +48,6 @@ func NewGatewayService(redisClient *redis.Client) *GatewayService {
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		}),
-		tokenCache:   NewTokenCache(5*time.Minute, 10*time.Minute),
 		shutdownChan: make(chan struct{}),
 	}
 }
@@ -94,7 +89,7 @@ func (s *GatewayService) Shutdown(ctx context.Context) error {
 	close(s.shutdownChan)
 
 	// 2. 关闭所有 WebSocket 连接
-	s.websocketServer.Shutdown()
+	s.userConnections.CloseAll()
 
 	// 3. 清理 Redis 注册信息
 	s.cleanupRedisRegistrations()
@@ -108,33 +103,16 @@ func (s *GatewayService) Shutdown(ctx context.Context) error {
 func (s *GatewayService) handleWebSocketConnection(conn *websocket.Conn, userID string, token string, deviceID string) {
 	log.Printf("WebSocket connection attempt for user: %s, device: %s", userID, deviceID)
 
-	// 1. Token 验证
-	authResult, err := s.validateToken(userID, token, deviceID)
-	if err != nil || !authResult.Valid {
-		log.Printf("Token validation failed for user %s: %v", userID, err)
+	// TODO: 1. 调用逻辑网关进行 Token 验证, 检查是否多端登录
 
-		// 发送验证失败消息后关闭连接
-		s.sendAuthResult(conn, false, "Token validation failed")
-		conn.Close()
-		return
-	}
-
-	// 2. 检查是否多端登录
-	if s.shouldKickExistingConnection(userID, deviceID) {
-		s.kickExistingConnection(userID, deviceID, "multi_login")
-	}
-
-	// 3. 注册用户连接 - 传递指针
+	// 2. 注册用户连接 - 传递指针
 	s.userConnections.Register(userID, deviceID, conn)
 
-	// 4. 注册到 Redis
-	s.registerUserConnection(userID, deviceID, authResult)
+	// 3. 注册到 Redis
+	s.registerUserConnection(userID, deviceID)
 
-	// 5. 通知业务服务用户上线
+	// 4. 通知业务服务用户上线
 	s.notifyUserStatusChange(userID, deviceID, "online")
-
-	// 6. 发送验证成功消息
-	s.sendAuthResult(conn, true, "Authentication successful")
 
 	log.Printf("User %s (device: %s) connected successfully", userID, deviceID)
 
@@ -171,65 +149,19 @@ func (s *GatewayService) handleWebSocketConnection(conn *websocket.Conn, userID 
 	}
 }
 
-func (s *GatewayService) validateToken(userID, token, deviceID string) (*muc.TokenValidateResponse, error) {
-	// 1. 先检查缓存
-	if cachedResult := s.tokenCache.Get(userID, token); cachedResult != nil {
-		if cachedResult.Valid && cachedResult.ExpireTime > time.Now().Unix() {
-			log.Printf("Token cache hit for user: %s", userID)
-			return cachedResult, nil
-		}
-	}
-
-	// 2. 调用 MUC 服务验证
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	authResult, err := s.dubboClient.MUCService.ValidateToken(ctx, &muc.TokenValidateRequest{
-		UserId:   userID,
-		Token:    token,
-		DeviceId: deviceID,
-	})
-	if err != nil {
-		log.Printf("Token validation RPC error for user %s: %v", userID, err)
-		return nil, err
-	}
-
-	// 3. 缓存验证结果
-	if authResult.Valid {
-		s.tokenCache.Set(userID, token, authResult)
-	}
-
-	return authResult, nil
-}
-
-func (s *GatewayService) shouldKickExistingConnection(userID, deviceID string) bool {
-	// 根据业务策略决定是否踢掉现有连接
-	existingDevices := s.userConnections.GetUserDevices(userID)
-
-	if len(existingDevices) == 0 {
-		return false
-	}
-
-	// 示例策略：同设备允许，不同设备不允许
-	for _, existingDevice := range existingDevices {
-		if existingDevice != deviceID {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (s *GatewayService) kickExistingConnection(userID, deviceID, reason string) {
 	if conn := s.userConnections.Get(userID, deviceID); conn != nil {
 		// 发送被踢下线的消息
-		kickMsg := &common.ServerMessage{
-			MessageId: utils.GenerateMessageID(),
-			Type:      "auth",
-			Action:    "kicked",
-			Data:      []byte(fmt.Sprintf(`{"reason": "%s"}`, reason)),
-			Timestamp: time.Now().Unix(),
-			Status:    "info",
+		kickMsg := &common.Message{
+			MsgId: utils.GenerateMessageID(),
+			Type:  common.MessageType_TEXT,
+			Content: &common.MessageContent{
+				Content: &common.MessageContent_Text{
+					Text: &common.TextContent{
+						Text: reason,
+					},
+				},
+			},
 		}
 
 		conn.WriteJSON(kickMsg)
@@ -242,58 +174,15 @@ func (s *GatewayService) kickExistingConnection(userID, deviceID, reason string)
 	}
 }
 
-func (s *GatewayService) sendAuthResult(conn *websocket.Conn, success bool, message string) {
-	authResponse := &common.ServerMessage{
-		MessageId: utils.GenerateMessageID(),
-		Type:      "auth",
-		Action:    "login_result",
-		Timestamp: time.Now().Unix(),
-		Status:    "success",
-	}
-
-	if !success {
-		authResponse.Status = "error"
-		authResponse.ErrorMsg = message
-	} else {
-		authResponse.Data = []byte(fmt.Sprintf(`{"message": "%s"}`, message))
-	}
-
-	conn.WriteJSON(authResponse)
-}
-
 func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage []byte) {
 	startTime := time.Now()
 
-	// 解析基础消息格式
-	var clientMsg common.ClientMessage
-	if err := json.Unmarshal(rawMessage, &clientMsg); err != nil {
-		log.Printf("Failed to parse message from user %s: %v", userID, err)
-		s.sendErrorToUser(userID, deviceID, "Invalid message format")
-		return
-	}
-
-	// 设置用户ID和设备ID
-	clientMsg.UserId = userID
-	clientMsg.DeviceId = deviceID
-	clientMsg.Timestamp = time.Now().Unix()
-
-	// 在消息数据中添加设备信息
-	if len(clientMsg.Data) == 0 {
-		clientMsg.Data = []byte("{}")
-	}
-
-	var dataMap map[string]interface{}
-	if err := json.Unmarshal(clientMsg.Data, &dataMap); err == nil {
-		dataMap["device_id"] = deviceID
-		if enhancedData, err := json.Marshal(dataMap); err == nil {
-			clientMsg.Data = enhancedData
-		}
-	}
-
 	// 直接转发到业务服务
-	serverMsg, err := s.dubboClient.MsgService.HandleClientMessage(
+	serverMsg, err := s.dubboClient.GatewayService.HandleClientMessage(
 		context.Background(),
-		&clientMsg,
+		&dubboservice.ClientMessageRequest{
+			Message: rawMessage,
+		},
 	)
 	if err != nil {
 		log.Printf("Failed to process message for user %s: %v", userID, err)
@@ -303,7 +192,19 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 
 	// 如果有立即响应，直接返回给用户
 	if serverMsg != nil {
-		if err := s.sendServerMessageToUser(userID, deviceID, serverMsg); err != nil {
+		msg := &common.Message{
+			MsgId:      serverMsg.MsgId,
+			Status:     serverMsg.Status,
+			ServerTime: serverMsg.ServerTime,
+			Content: &common.MessageContent{
+				Content: &common.MessageContent_Text{
+					Text: &common.TextContent{
+						Text: serverMsg.ErrorMsg,
+					},
+				},
+			},
+		}
+		if err := s.sendServerMessageToUser(userID, deviceID, msg); err != nil {
 			log.Printf("Failed to send response to user %s: %v", userID, err)
 		}
 	}
@@ -315,27 +216,8 @@ func (s *GatewayService) handleClientMessage(userID, deviceID string, rawMessage
 	}
 }
 
-func (s *GatewayService) handleServerPush(pushRequest *ima.PushRequest) {
-	log.Printf("Received server push for user: %s, device: %s", pushRequest.UserId, pushRequest.DeviceId)
-
-	if pushRequest.UserId == "" {
-		// 广播消息
-		s.broadcastMessage(pushRequest.Message)
-	} else if pushRequest.DeviceId == "" {
-		// 推送给用户的所有设备
-		s.userConnections.BroadcastToUser(pushRequest.UserId, func(deviceID string, conn *websocket.Conn) {
-			if err := conn.WriteJSON(pushRequest.Message); err != nil {
-				log.Printf("Failed to push to user %s (device: %s): %v", pushRequest.UserId, deviceID, err)
-			}
-		})
-	} else {
-		// 单设备推送
-		s.sendServerMessageToUser(pushRequest.UserId, pushRequest.DeviceId, pushRequest.Message)
-	}
-}
-
 // 确保所有 WebSocket 操作都使用指针
-func (s *GatewayService) sendServerMessageToUser(userID, deviceID string, serverMsg *common.ServerMessage) error {
+func (s *GatewayService) sendServerMessageToUser(userID, deviceID string, serverMsg *common.Message) error {
 	conn := s.userConnections.Get(userID, deviceID)
 	if conn == nil {
 		return fmt.Errorf("user %s (device: %s) not connected", userID, deviceID)
@@ -345,24 +227,23 @@ func (s *GatewayService) sendServerMessageToUser(userID, deviceID string, server
 	return conn.WriteJSON(serverMsg)
 }
 
-func (s *GatewayService) broadcastMessage(serverMsg *common.ServerMessage) {
-	s.userConnections.Broadcast(func(userID, deviceID string, conn *websocket.Conn) {
-		if err := conn.WriteJSON(serverMsg); err != nil {
-			log.Printf("Failed to broadcast to user %s (device: %s): %v", userID, deviceID, err)
-		}
-	})
-}
-
 func (s *GatewayService) sendErrorToUser(userID, deviceID, errorMsg string) {
 	conn := s.userConnections.Get(userID, deviceID)
 	if conn != nil {
-		errorResponse := &common.ServerMessage{
-			MessageId: utils.GenerateMessageID(),
-			Type:      "error",
-			Status:    "error",
-			ErrorMsg:  errorMsg,
-			Timestamp: time.Now().Unix(),
+		errorResponse := &common.Message{
+			MsgId:            utils.GenerateMessageID(),
+			Type:             common.MessageType_TEXT,
+			ConversationType: common.ConversationType_SYSTEM_CHAT,
+			ServerTime:       time.Now().Unix(),
+			Content: &common.MessageContent{
+				Content: &common.MessageContent_Text{
+					Text: &common.TextContent{
+						Text: errorMsg,
+					},
+				},
+			},
 		}
+
 		conn.WriteJSON(errorResponse)
 	}
 }
@@ -372,14 +253,13 @@ func (s *GatewayService) notifyUserStatusChange(userID, deviceID, status string)
 	log.Printf("User %s (device: %s) status changed to: %s", userID, deviceID, status)
 }
 
-func (s *GatewayService) registerUserConnection(userID, deviceID string, authResult *muc.TokenValidateResponse) {
+func (s *GatewayService) registerUserConnection(userID, deviceID string) {
 	connInfo := map[string]interface{}{
 		"user_id":      userID,
 		"device_id":    deviceID,
 		"ima_instance": s.instanceID,
 		"login_time":   time.Now().Unix(),
 		"last_active":  time.Now().Unix(),
-		"user_info":    authResult.UserInfo,
 	}
 
 	if err := s.redisClient.SetUserConnection(userID, deviceID, connInfo); err != nil {
@@ -390,19 +270,6 @@ func (s *GatewayService) registerUserConnection(userID, deviceID string, authRes
 func (s *GatewayService) unregisterUserConnection(userID, deviceID string) {
 	if err := s.redisClient.RemoveUserConnection(userID, deviceID); err != nil {
 		log.Printf("Failed to unregister user %s from Redis: %v", userID, err)
-	}
-}
-
-func (s *GatewayService) updateInstanceStatus() {
-	status := map[string]interface{}{
-		"instance_id":  s.instanceID,
-		"online_users": s.userConnections.GetOnlineCount(),
-		"last_update":  time.Now().Unix(),
-		"status":       "healthy",
-	}
-
-	if err := s.redisClient.SetInstanceStatus(s.instanceID, status); err != nil {
-		log.Printf("Failed to update instance status: %v", err)
 	}
 }
 
@@ -436,57 +303,90 @@ func (s *GatewayService) startStatsReporter() {
 	}
 }
 
-// PushToUser 实现单用户推送
-func (s *GatewayService) PushToUser(ctx context.Context, req *ima.PushRequest) (*common.BaseResponse, error) {
-	if err := s.sendServerMessageToUser(req.UserId, req.DeviceId, req.Message); err != nil {
-		return &common.BaseResponse{
-			Success:   false,
-			Code:      "PUSH_FAILED",
-			Message:   err.Error(),
-			Timestamp: time.Now().Unix(),
+// PushToTarget 实现单用户推送
+func (s *GatewayService) PushToTarget(ctx context.Context, req *common.PushRequest) (*common.PushResponse, error) {
+
+	targets := req.GetTargetDevices().GetDevices()
+
+	if targets == nil || len(targets) == 0 {
+		log.Printf("Gateway PushToUser - no device ids specified")
+		return &common.PushResponse{
+			Success: false,
 		}, nil
 	}
 
-	return &common.BaseResponse{
-		Success:   true,
-		Timestamp: time.Now().Unix(),
-	}, nil
-}
+	totalCount := len(targets)
 
-// PushToUsers 实现批量推送
-func (s *GatewayService) PushToUsers(ctx context.Context, req *ima.BatchPushRequest) (*common.BaseResponse, error) {
 	successCount := 0
-	for _, push := range req.Pushes {
-		if err := s.sendServerMessageToUser(push.UserId, push.DeviceId, push.Message); err != nil {
-			log.Printf("Failed to push to user %s: %v", push.UserId, err)
+	var res []*common.PushResult
+	for i := 0; i < totalCount; i++ {
+		target := targets[i]
+		if err := s.sendServerMessageToUser(target.GetUserId(), target.GetDeviceId(), req.Message); err != nil {
+			item := &common.PushResult{
+				Status:   3,
+				PushTime: time.Now().Unix(),
+			}
+			res[i] = item
 		} else {
 			successCount++
 		}
 	}
 
-	return &common.BaseResponse{
-		Success:   true,
-		Message:   fmt.Sprintf("Successfully pushed to %d users", successCount),
-		Timestamp: time.Now().Unix(),
+	return &common.PushResponse{
+		Success:      true,
+		TotalTargets: int32(totalCount),
+		SuccessCount: int32(successCount),
+		FailedCount:  int32(totalCount - successCount),
+		Results:      res,
 	}, nil
 }
 
 // Broadcast 实现广播消息
-func (s *GatewayService) Broadcast(ctx context.Context, req *ima.BroadcastMessage) (*common.BaseResponse, error) {
-	s.broadcastMessage(req.Message)
+func (s *GatewayService) Broadcast(ctx context.Context, req *common.PushBroadcastRequest) (*dubboservice.WsBroadcastResponse, error) {
 
-	return &common.BaseResponse{
-		Success:   true,
-		Timestamp: time.Now().Unix(),
+	serverMsg := req.Message
+	totalCount := s.userConnections.GetOnlineCount()
+	errorCount := 0
+	s.userConnections.Broadcast(func(userID, deviceID string, conn *websocket.Conn) {
+		if err := conn.WriteJSON(serverMsg); err != nil {
+			errorCount++
+			log.Printf("Failed to broadcast to user %s (device: %s): %v", userID, deviceID, err)
+		}
+	})
+
+	return &dubboservice.WsBroadcastResponse{
+		TotalUsers:  int64(totalCount),
+		PushedUsers: int64(totalCount - errorCount),
+		FailedUsers: int64(errorCount),
+		TaskId:      req.RequestId,
 	}, nil
 }
 
 // KickUser 实现踢用户下线
-func (s *GatewayService) KickUser(ctx context.Context, req *ima.KickUserRequest) (*common.BaseResponse, error) {
-	s.kickExistingConnection(req.UserId, req.DeviceId, req.Reason)
+func (s *GatewayService) KickUser(ctx context.Context, req *dubboservice.WsKickUserRequest) (*common.Response, error) {
 
-	return &common.BaseResponse{
-		Success:   true,
+	targets := req.GetTargetDevices().GetDevices()
+	if targets == nil || len(targets) == 0 {
+		log.Printf("Gateway PushToUser - no device ids specified")
+		return &common.Response{
+			Code: 500,
+		}, nil
+	}
+
+	excludeDeviceIds := req.GetExcludeDeviceIds()
+
+	totalCount := len(targets)
+	for i := 0; i < totalCount; i++ {
+		target := targets[i]
+		// 排除
+		if excludeDeviceIds != nil && slices.Contains(excludeDeviceIds, target.DeviceId) {
+			continue
+		}
+		s.kickExistingConnection(target.UserId, target.DeviceId, req.ReasonMessage)
+	}
+
+	return &common.Response{
+		Code:      200,
 		Timestamp: time.Now().Unix(),
 	}, nil
 }
